@@ -1,207 +1,309 @@
 // src/pages/ListDetailPage.js
-import React, { useMemo, useState } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import React, { useState } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
 
 const CURRENT_USER_ID = "user-1";
 
-// jednoduchá „databáze“ v paměti
-const MOCK_DATA = {
-  "list-1": {
+// jednoduchý mock, jen pro vzhled a základní logiku
+const INITIAL_LISTS = [
+  {
     id: "list-1",
-    name: "Víkendový nákup",
-    owner: { id: "user-1", name: "Petr (Vlastník)" },
-    members: [
-      { id: "user-2", name: "Jana" },
-      { id: "user-3", name: "Karel" },
-    ],
-    items: [
-      { id: "item-1", name: "Mléko", solved: false },
-      { id: "item-2", name: "Chleba", solved: true },
-      { id: "item-3", name: "Vejce", solved: false },
-    ],
+    name: "Penny - týdenní nákup",
+    ownerId: "user-1",
+    ownerName: "Matyáš Novák",
+    items: ["Mléko", "Chleba"],
   },
-};
+  {
+    id: "list-2",
+    name: "Lidl - párty nákup",
+    ownerId: "user-1",
+    ownerName: "Matyáš Novák",
+    items: ["Brambůrky", "Kola"],
+  },
+  {
+    id: "list-3",
+    name: "Billa - minulý měsíc",
+    ownerId: "user-2",
+    ownerName: "Jana",
+    items: ["Voda", "Vodka 1L", "Pomeranče 0,5kg", "Rohlíky 5ks"],
+  },
+];
 
 export default function ListDetailPage() {
-  const { id } = useParams();
   const nav = useNavigate();
+  const { id } = useParams();
 
-  const initialList = MOCK_DATA[id];
-  const [list, setList] = useState(initialList);
-  const [nameInput, setNameInput] = useState(initialList?.name || "");
+  const initialList = INITIAL_LISTS.find((l) => l.id === id) || null;
+
+  const [name, setName] = useState(initialList ? initialList.name : "");
+  const [items, setItems] = useState(initialList ? initialList.items : []);
   const [newItem, setNewItem] = useState("");
-  const [filter, setFilter] = useState("pending"); // 'pending' | 'all' | 'solved'
-  const [newMember, setNewMember] = useState("");
 
-  if (!list) {
-    return (
-      <div style={s.shell}><div style={s.card}>
-        <p>Seznam nenalezen.</p>
-        <Link to="/">← Zpět</Link>
-      </div></div>
-    );
-  }
+  const isOwner =
+    initialList && initialList.ownerId === CURRENT_USER_ID;
 
-  const isOwner = list.owner.id === CURRENT_USER_ID;
-  const isMember = isOwner || list.members.some((m) => m.id === CURRENT_USER_ID);
-  if (!isMember) return <div style={{ padding: 24 }}>K tomuto seznamu nemáš přístup.</div>;
-
-  const filteredItems = useMemo(() => {
-    if (filter === "pending") return list.items.filter((i) => !i.solved);
-    if (filter === "solved")  return list.items.filter((i) =>  i.solved);
-    return list.items;
-  }, [list.items, filter]);
-
-  const saveName = () => {
-    if (!isOwner) return;
-    setList((p) => ({ ...p, name: nameInput }));
-  };
   const addItem = () => {
-    if (!newItem.trim()) return;
-    const item = { id: "item-" + Date.now(), name: newItem.trim(), solved: false };
-    setList((p) => ({ ...p, items: [...p.items, item] }));
+    const trimmed = newItem.trim();
+    if (!trimmed) return;
+    setItems((prev) => [...prev, trimmed]);
     setNewItem("");
   };
-  const toggleItem = (itemId) => {
-    setList((p) => ({
-      ...p,
-      items: p.items.map((i) => (i.id === itemId ? { ...i, solved: !i.solved } : i)),
-    }));
+
+  const removeItem = (index) => {
+    setItems((prev) => prev.filter((_, i) => i !== index));
   };
-  const removeItem = (itemId) => {
-    setList((p) => ({ ...p, items: p.items.filter((i) => i.id !== itemId) }));
+
+  const handleSave = () => {
+    // tady by se normálně volalo API / propsalo do globálního stavu
+    nav("/list");
   };
-  const addMember = () => {
-    if (!isOwner || !newMember.trim()) return;
-    const m = { id: "user-" + Date.now(), name: newMember.trim() };
-    setList((p) => ({ ...p, members: [...p.members, m] }));
-    setNewMember("");
-  };
-  const removeMember = (uid) => {
-    if (!isOwner) return;
-    setList((p) => ({ ...p, members: p.members.filter((m) => m.id !== uid) }));
-  };
-  const leaveList = () => {
-    if (isOwner) return;
-    setList((p) => ({ ...p, members: p.members.filter((m) => m.id !== CURRENT_USER_ID) }));
-    nav("/");
+
+  const handleCancel = () => {
+    nav("/list");
   };
 
   return (
-    <div style={s.shell}><div style={s.card}>
-      <div style={{ marginBottom: 12 }}>
-        <Link to="/">← Zpět</Link>
-      </div>
-
-      <h1 style={{ marginTop: 0 }}>Detail nákupního seznamu</h1>
-
-      <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 12 }}>
-        {isOwner ? (
-          <>
-            <input value={nameInput} onChange={(e) => setNameInput(e.target.value)} style={s.input} />
-            <button onClick={saveName} style={s.primary}>Uložit název</button>
-          </>
-        ) : (
-          <h2 style={{ margin: 0 }}>{list.name}</h2>
-        )}
-      </div>
-
-      <div style={{ marginBottom: 8 }}>
-        <div><strong>Vlastník:</strong> {list.owner.name}</div>
-        <div style={{ marginTop: 6 }}>
-          <strong>Členové:</strong> {list.members.length ? list.members.map((m) => m.name).join(", ") : "—"}
-        </div>
-
-        {isOwner ? (
-          <div style={{ marginTop: 8, display: "flex", gap: 8 }}>
-            <input
-              placeholder="Přidat člena (jméno)"
-              value={newMember}
-              onChange={(e) => setNewMember(e.target.value)}
-              style={s.input}
-            />
-            <button onClick={addMember}>Přidat</button>
-          </div>
-        ) : (
-          <div style={{ marginTop: 8 }}>
-            <button onClick={leaveList} style={s.danger}>Opustit seznam</button>
-          </div>
-        )}
-
-        {isOwner && list.members.length > 0 && (
-          <div style={{ marginTop: 6 }}>
-            {list.members.map((m) => (
-              <span key={m.id} style={s.chip}>
-                {m.name}
-                <button onClick={() => removeMember(m.id)} style={s.chipBtn}>×</button>
-              </span>
-            ))}
-          </div>
-        )}
-      </div>
-
-      <div style={{ marginTop: 12 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <strong>Položky</strong>
+    <div style={s.page}>
+      <div style={s.container}>
+        <header style={s.header}>
           <div>
-            <button onClick={() => setFilter("pending")} disabled={filter === "pending"}>Jen nevyřešené</button>{" "}
-            <button onClick={() => setFilter("all")}     disabled={filter === "all"}>Vše</button>{" "}
-            <button onClick={() => setFilter("solved")}  disabled={filter === "solved"}>Jen vyřešené</button>
+            <h1 style={s.title}>Detail nákupního seznamu</h1>
+            <p style={s.subtitle}>
+              Zobrazení a úprava existujícího nákupního seznamu.
+            </p>
           </div>
-        </div>
+          <div>
+            <Link to="/list" style={s.linkBack}>
+              ← Zpět na přehled
+            </Link>
+          </div>
+        </header>
 
-        <ul style={{ listStyle: "none", paddingLeft: 0 }}>
-          {filteredItems.length === 0 && <li style={{ color: "#666" }}>Žádné položky.</li>}
-          {filteredItems.map((it) => (
-            <li key={it.id} style={s.itemRow}>
-              <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <input type="checkbox" checked={it.solved} onChange={() => toggleItem(it.id)} />
-                <span style={it.solved ? { textDecoration: "line-through", color: "#888" } : {}}>
-                  {it.name}
-                </span>
-              </label>
-              <div style={{ display: "flex", gap: 6 }}>
-                <button
-                  onClick={() => {
-                    const v = prompt("Nový název položky:", it.name);
-                    if (v && v.trim()) {
-                      const name = v.trim();
-                      setList((p) => ({
-                        ...p,
-                        items: p.items.map((x) => (x.id === it.id ? { ...x, name } : x)),
-                      }));
-                    }
-                  }}
-                >✏️</button>
-                <button onClick={() => removeItem(it.id)} style={s.dangerSmall}>🗑️</button>
-              </div>
-            </li>
-          ))}
-        </ul>
+        {!initialList ? (
+          <div style={s.card}>
+            <p>Seznam nebyl nalezen.</p>
+            <Link to="/list" style={s.linkBack}>
+              ← Zpět na přehled
+            </Link>
+          </div>
+        ) : (
+          <div style={s.card}>
+            {/* Název seznamu */}
+            <div style={s.field}>
+              <label style={s.label}>Název seznamu</label>
+              <input
+                style={s.input}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </div>
 
-        <div style={{ display: "flex", gap: 8 }}>
-          <input
-            placeholder="Nová položka…"
-            value={newItem}
-            onChange={(e) => setNewItem(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && addItem()}
-            style={{ ...s.input, flex: 1 }}
-          />
-          <button onClick={addItem} style={s.primary}>Přidat</button>
-        </div>
+            {/* Vlastník */}
+            <div style={s.field}>
+              <label style={s.label}>Vlastník</label>
+              <input
+                style={{ ...s.input, color: "#6b7280", background: "#fff" }}
+                value={isOwner ? "Vy" : initialList.ownerName}
+                readOnly
+              />
+            </div>
+
+            {/* Členové */}
+            <div style={s.field}>
+              <label style={s.label}>Členové</label>
+              <input
+                style={{ ...s.input, color: "#6b7280", background: "#fff" }}
+                value="Zatím žádní členové"
+                readOnly
+              />
+            </div>
+
+            {/* Položky */}
+            <div style={s.field}>
+              <label style={s.label}>Položky</label>
+
+              <ul style={s.itemsList}>
+                {items.map((it, i) => (
+                  <li key={i} style={s.itemRow}>
+                    <span>{it}</span>
+                    {isOwner && (
+                      <button
+                        style={s.deleteSmallButton}
+                        onClick={() => removeItem(i)}
+                      >
+                        Smazat
+                      </button>
+                    )}
+                  </li>
+                ))}
+                {items.length === 0 && (
+                  <li style={s.emptyText}>Žádné položky.</li>
+                )}
+              </ul>
+
+              {isOwner && (
+                <div style={s.addRow}>
+                  <input
+                    style={s.input}
+                    placeholder="Nová položka"
+                    value={newItem}
+                    onChange={(e) => setNewItem(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && addItem()}
+                  />
+                  <button style={s.secondaryButton} onClick={addItem}>
+                    Přidat položku
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Spodní tlačítka */}
+            <div style={s.footerButtons}>
+              <button style={s.cancelButton} onClick={handleCancel}>
+                Zrušit
+              </button>
+              {isOwner && (
+                <button style={s.primaryButton} onClick={handleSave}>
+                  Uložit změny
+                </button>
+              )}
+            </div>
+          </div>
+        )}
       </div>
-    </div></div>
+    </div>
   );
 }
 
 const s = {
-  shell: { minHeight: "100vh", background: "#a8a8a8", display: "flex", justifyContent: "center", padding: 16 },
-  card: { width: 360, background: "#fff", borderRadius: 16, padding: 16, boxShadow: "0 4px 18px rgba(0,0,0,.12)" },
-  input: { border: "1px solid #ddd", borderRadius: 8, padding: "8px 10px", outline: "none" },
-  primary: { background: "#62b4ff", color: "#fff", border: "none", borderRadius: 8, padding: "8px 12px", cursor: "pointer" },
-  danger: { background: "#ff6666", color: "#fff", border: "none", borderRadius: 8, padding: "8px 12px", cursor: "pointer" },
-  dangerSmall: { background: "#ffd6d6", border: "none", borderRadius: 6, padding: "4px 8px", cursor: "pointer" },
-  chip: { display: "inline-flex", alignItems: "center", gap: 6, background: "#f3f3f3", borderRadius: 999, padding: "4px 8px", marginRight: 6, marginTop: 6 },
-  chipBtn: { border: "none", background: "transparent", cursor: "pointer", fontWeight: "bold" },
-  itemRow: { display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid #eee", padding: "6px 0" },
+  page: {
+    minHeight: "100vh",
+    background: "#eef1f7",
+    padding: "40px 60px",
+    fontFamily: "Arial, sans-serif",
+    boxSizing: "border-box",
+  },
+  container: {
+    maxWidth: 900,
+    margin: "0 auto",
+  },
+  header: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginBottom: 24,
+  },
+  title: {
+    margin: 0,
+    fontSize: 26,
+  },
+  subtitle: {
+    margin: "6px 0 0",
+    color: "#4b5563",
+    fontSize: 14,
+  },
+  linkBack: {
+    fontSize: 14,
+    color: "#2563eb",
+    textDecoration: "none",
+  },
+
+  card: {
+    background: "#fff",
+    borderRadius: 16,
+    padding: 24,
+    boxShadow: "0 6px 18px rgba(0,0,0,0.1)",
+  },
+
+  field: {
+    marginBottom: 20,
+  },
+  label: {
+    display: "block",
+    marginBottom: 6,
+    fontWeight: 600,
+    fontSize: 14,
+  },
+  input: {
+    width: "100%",
+    padding: "10px 12px",
+    borderRadius: 8,
+    border: "1px solid #cbd5e1",
+    fontSize: 15,
+    boxSizing: "border-box",
+  },
+
+  itemsList: {
+    listStyle: "none",
+    padding: 0,
+    margin: "0 0 10px",
+    borderRadius: 8,
+    border: "1px solid #e5e7eb",
+    background: "#f9fafb",
+  },
+  itemRow: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: "8px 10px",
+    borderBottom: "1px solid #e5e7eb",
+  },
+  emptyText: {
+    padding: "8px 10px",
+    fontStyle: "italic",
+    color: "#6b7280",
+  },
+  addRow: {
+    display: "flex",
+    gap: 10,
+    marginTop: 8,
+  },
+
+  footerButtons: {
+    marginTop: 24,
+    display: "flex",
+    justifyContent: "flex-end",
+    gap: 12,
+  },
+
+  primaryButton: {
+    background: "#2563eb",
+    color: "#fff",
+    padding: "10px 20px",
+    border: "none",
+    borderRadius: 10,
+    cursor: "pointer",
+    fontWeight: 600,
+    fontSize: 15,
+  },
+  cancelButton: {
+    background: "#e5e7eb",
+    color: "#111827",
+    padding: "10px 20px",
+    borderRadius: 10,
+    border: "1px solid #d1d5db",
+    cursor: "pointer",
+    fontWeight: 500,
+    fontSize: 14,
+  },
+  secondaryButton: {
+    background: "#f1f5f9",
+    color: "#111827",
+    padding: "10px 18px",
+    borderRadius: 10,
+    border: "1px solid #cbd5e1",
+    cursor: "pointer",
+    fontWeight: 500,
+    fontSize: 14,
+    whiteSpace: "nowrap",
+  },
+  deleteSmallButton: {
+    background: "#fee2e2",
+    color: "#ee1111ff",
+    padding: "6px 12px",
+    borderRadius: 8,
+    border: "1px solid #ee1111ff",
+    cursor: "pointer",
+    fontWeight: 600,
+  },
 };
