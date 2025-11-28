@@ -39,13 +39,12 @@ export default function ListPage() {
   const nav = useNavigate();
 
   const [lists, setLists] = useState(INITIAL_LISTS);
-  const [showArchived, setShowArchived] = useState(false);
   const [toDelete, setToDelete] = useState(null);
 
+  // ✅ /list = vždy jen nearchivované seznamy
   const visibleLists = useMemo(() => {
-    if (showArchived) return lists;
     return lists.filter((l) => !l.archived);
-  }, [lists, showArchived]);
+  }, [lists]);
 
   const openDetail = (id) => {
     nav(`/list/${id}`);
@@ -53,6 +52,10 @@ export default function ListPage() {
 
   const openNewPage = () => {
     nav("/list/new");
+  };
+
+  const openArchivePage = () => {
+    nav("/archiv");
   };
 
   const askDelete = (list) => setToDelete(list);
@@ -65,10 +68,6 @@ export default function ListPage() {
 
   const cancelDelete = () => setToDelete(null);
 
-  const toggleArchived = () => {
-    setShowArchived((prev) => !prev);
-  };
-
   return (
     <div style={s.page}>
       <header style={s.header}>
@@ -76,8 +75,8 @@ export default function ListPage() {
 
         <div style={s.headerRight}>
           <button
-            style={showArchived ? s.secondaryButtonActive : s.secondaryButton}
-            onClick={toggleArchived}
+            style={s.secondaryButton}
+            onClick={openArchivePage}
           >
             Zobrazit archivované
           </button>
