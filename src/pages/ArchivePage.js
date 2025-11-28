@@ -13,74 +13,127 @@ export default function ArchivePage() {
   const nav = useNavigate();
   const [lists, setLists] = useState(INITIAL_ARCHIVE);
 
+  const [toDeleteOne, setToDeleteOne] = useState(null);
+  const [toDeleteAll, setToDeleteAll] = useState(false);
+
   const openDetail = (id) => {
     nav(`/list/${id}`);
   };
 
-  const removeOne = (id) => {
-    setLists((prev) => prev.filter((l) => l.id !== id));
+  // otevře modál pro konkrétní list
+  const askDeleteOne = (list) => setToDeleteOne(list);
+
+  // potvrzení odstranění jednoho listu
+  const confirmDeleteOne = () => {
+    setLists((prev) => prev.filter((l) => l.id !== toDeleteOne.id));
+    setToDeleteOne(null);
   };
 
-  const removeAll = () => {
-    if (window.confirm("Opravdu smazat všechny archivované seznamy?")) {
-      setLists([]);
-    }
+  const cancelDeleteOne = () => setToDeleteOne(null);
+
+  // otevře modál „smazat všechny“
+  const askDeleteAll = () => setToDeleteAll(true);
+
+  const confirmDeleteAll = () => {
+    setLists([]);
+    setToDeleteAll(false);
   };
+
+  const cancelDeleteAll = () => setToDeleteAll(false);
 
   return (
     <div style={s.page}>
-      <div style={s.container}>
-        <header style={s.header}>
-          <h1>Archivované seznamy</h1>
+      <header style={s.header}>
+        <h1>Archivované seznamy</h1>
+
+        <div style={s.headerRight}>
+          {lists.length > 0 && (
+            <button style={s.deleteAllButton} onClick={askDeleteAll}>
+              Smazat všechny archivované
+            </button>
+          )}
+
           <Link to="/list" style={s.backLink}>
             ← Zpět na přehled
           </Link>
-        </header>
-
-        <div style={s.grid}>
-          {lists.length === 0 && (
-            <div style={s.emptyText}>Archiv je prázdný.</div>
-          )}
-
-          {lists.map((list) => {
-            const isOwner = list.ownerId === CURRENT_USER_ID;
-            return (
-              <div key={list.id} style={s.card}>
-                <div style={s.cardTitle}>{list.name}</div>
-                <div style={s.ownerNote}>
-                  Vlastník: {isOwner ? "Vy" : list.ownerName}
-                </div>
-
-                <div style={s.cardButtons}>
-                  <button
-                    style={s.detailButton}
-                    onClick={() => openDetail(list.id)}
-                  >
-                    Zobrazit detail
-                  </button>
-
-                  {isOwner && (
-                    <button
-                      style={s.deleteButton}
-                      onClick={() => removeOne(list.id)}
-                    >
-                      Smazat
-                    </button>
-                  )}
-                </div>
-              </div>
-            );
-          })}
         </div>
+      </header>
 
-        {lists.length > 0 && (
-          <div style={s.bottomControls}>
-            <button style={s.deleteAllButton} onClick={removeAll}>
-              Smazat všechny archivované
-            </button>
-          </div>
+      <div style={s.grid}>
+        {lists.length === 0 && (
+          <div style={s.emptyText}>Archiv je prázdný.</div>
         )}
+
+        {lists.map((list) => {
+          const isOwner = list.ownerId === CURRENT_USER_ID;
+          return (
+            <div key={list.id} style={s.card}>
+              <div style={s.cardTitle}>{list.name}</div>
+              <div style={s.ownerNote}>
+                Vlastník: {isOwner ? "Vy" : list.ownerName}
+              </div>
+
+              <div style={s.cardButtons}>
+                <button
+                  style={s.detailButton}
+                  onClick={() => openDetail(list.id)}
+                >
+                  Zobrazit detail
+                </button>
+
+                {isOwner && (
+                  <button
+                    style={s.deleteButton}
+                    onClick={() => askDeleteOne(list)}
+                  >
+                    Smazat
+                  </button>
+                )}
+              </div>
+            </div>
+          );
+        })}
       </div>
+
+      {/* MODÁL – smazat jeden */}
+      {toDeleteOne && (
+        <div style={s.modalOverlay}>
+          <div style={s.modal}>
+            <h3>Smazat archivovaný seznam</h3>
+            <p>
+              Opravdu chceš smazat <strong>{toDeleteOne.name}</strong>?
+            </p>
+
+            <div style={s.modalButtons}>
+              <button style={s.cancelButton} onClick={cancelDeleteOne}>
+                Zrušit
+              </button>
+              <button style={s.deleteButton} onClick={confirmDeleteOne}>
+                Smazat
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODÁL – smazat všechny */}
+      {toDeleteAll && (
+        <div style={s.modalOverlay}>
+          <div style={s.modal}>
+            <h3>Smazat všechny archivované seznamy</h3>
+            <p>Opravdu chceš nenávratně smazat všechny archivované seznamy?</p>
+
+            <div style={s.modalButtons}>
+              <button style={s.cancelButton} onClick={cancelDeleteAll}>
+                Zrušit
+              </button>
+              <button style={s.deleteButton} onClick={confirmDeleteAll}>
+                Smazat vše
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -93,15 +146,16 @@ const s = {
     fontFamily: "Arial, sans-serif",
     boxSizing: "border-box",
   },
-  container: {
-    maxWidth: 900,
-    margin: "0 auto",
-  },
   header: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 24,
+    marginBottom: 30,
+  },
+  headerRight: {
+    display: "flex",
+    gap: 12,
+    alignItems: "center",
   },
   backLink: {
     fontSize: 14,
@@ -155,17 +209,45 @@ const s = {
     color: "#666",
     fontStyle: "italic",
   },
-  bottomControls: {
-    marginTop: 24,
-    textAlign: "right",
-  },
   deleteAllButton: {
     background: "#dc2626",
     color: "#fff",
-    padding: "10px 20px",
+    padding: "9px 18px",
     borderRadius: 10,
     border: "none",
     cursor: "pointer",
     fontWeight: 600,
+    fontSize: 14,
+  },
+  modalOverlay: {
+    position: "fixed",
+    inset: 0,
+    background: "rgba(0,0,0,0.4)",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1000,
+  },
+  modal: {
+    background: "#fff",
+    padding: 30,
+    borderRadius: 14,
+    width: 420,
+    boxShadow: "0 10px 30px rgba(0,0,0,0.25)",
+  },
+  modalButtons: {
+    display: "flex",
+    justifyContent: "flex-end",
+    gap: 12,
+  },
+  cancelButton: {
+    background: "#e5e7eb",
+    color: "#111827",
+    padding: "9px 18px",
+    borderRadius: 10,
+    border: "1px solid #d1d5db",
+    cursor: "pointer",
+    fontWeight: 500,
+    fontSize: 14,
   },
 };
