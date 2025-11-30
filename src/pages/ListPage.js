@@ -1,49 +1,31 @@
 // src/pages/ListPage.js
-import React, { useState, useMemo } from "react";
+import React, { useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import api from "../api";
+import { useApiRequest } from "../hooks/useApiRequest";
+import LoadingIndicator from "../components/loadingIndicator";
+import ErrorMessage from "../components/errorMessage";
 
 const CURRENT_USER_ID = "user-1";
-
-const INITIAL_LISTS = [
-  {
-    id: "list-1",
-    name: "Penny - týdenní nákup",
-    ownerId: "user-1",
-    ownerName: "Matyáš Novák",
-    archived: false,
-  },
-  {
-    id: "list-2",
-    name: "Lidl - párty nákup",
-    ownerId: "user-1",
-    ownerName: "Matyáš Novák",
-    archived: false,
-  },
-  {
-    id: "list-3",
-    name: "Billa - minulý měsíc",
-    ownerId: "user-2",
-    ownerName: "Jana",
-    archived: true,
-  },
-  {
-    id: "list-4",
-    name: "Albert - společný nákup",
-    ownerId: "user-2",
-    ownerName: "Jana",
-    archived: false,
-  },
-];
 
 export default function ListPage() {
   const nav = useNavigate();
 
-  const [lists, setLists] = useState(INITIAL_LISTS);
-  const [toDelete, setToDelete] = useState(null);
+  const {
+    status,
+    data: lists,
+    error,
+    execute: loadLists,
+    setData: setLists,
+  } = useApiRequest(api.getShoppingLists);
+
+  useEffect(() => {
+    loadLists();
+  }, [loadLists]);
 
   // ✅ /list = vždy jen nearchivované seznamy
   const visibleLists = useMemo(() => {
-    return lists.filter((l) => !l.archived);
+    return (lists || []).filter((l) => !l.archived);
   }, [lists]);
 
   const openDetail = (id) => {
@@ -58,26 +40,79 @@ export default function ListPage() {
     nav("/archiv");
   };
 
+  const [toDelete, setToDelete] = React.useState(null);
+
   const askDelete = (list) => setToDelete(list);
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (!toDelete) return;
-    setLists((prev) => prev.filter((l) => l.id !== toDelete.id));
-    setToDelete(null);
+    try {
+      await api.deleteShoppingList(toDelete.id);
+      setLists((prev) => (prev || []).filter((l) => l.id !== toDelete.id));
+    } catch (e) {
+      console.error(e);
+      alert("Nepodařilo se smazat seznam.");
+    } finally {
+      setToDelete(null);
+    }
   };
 
   const cancelDelete = () => setToDelete(null);
 
+  // 🔄 PENDING
+  if (status === "pending" && !lists) {
+    return (
+      <div style={s.page}>
+        <header style={s.header}>
+          <h1>Nákupní seznamy</h1>
+          <div style={s.headerRight}>
+            <button style={s.secondaryButton} onClick={openArchivePage}>
+              Zobrazit archivované
+            </button>
+            <button style={s.primaryButton} onClick={openNewPage}>
+              Nový seznam
+            </button>
+          </div>
+        </header>
+
+        <loadingIndicator text="Načítám nákupní seznamy..." />
+      </div>
+    );
+  }
+
+  // ❌ ERROR
+  if (status === "error") {
+    return (
+      <div style={s.page}>
+        <header style={s.header}>
+          <h1>Nákupní seznamy</h1>
+          <div style={s.headerRight}>
+            <button style={s.secondaryButton} onClick={openArchivePage}>
+              Zobrazit archivované
+            </button>
+            <button style={s.primaryButton} onClick={openNewPage}>
+              Nový seznam
+            </button>
+          </div>
+        </header>
+
+        <errorMessage
+          message="Nepodařilo se načíst nákupní seznamy."
+          detail={error?.message}
+          onRetry={loadLists}
+        />
+      </div>
+    );
+  }
+
+  // ✅ READY
   return (
     <div style={s.page}>
       <header style={s.header}>
         <h1>Nákupní seznamy</h1>
 
         <div style={s.headerRight}>
-          <button
-            style={s.secondaryButton}
-            onClick={openArchivePage}
-          >
+          <button style={s.secondaryButton} onClick={openArchivePage}>
             Zobrazit archivované
           </button>
 
@@ -227,16 +262,6 @@ const s = {
     padding: "9px 18px",
     borderRadius: 10,
     border: "1px solid #d1d5db",
-    cursor: "pointer",
-    fontWeight: 500,
-    fontSize: 14,
-  },
-  secondaryButtonActive: {
-    background: "#4b5563",
-    color: "#f9fafb",
-    padding: "9px 18px",
-    borderRadius: 10,
-    border: "1px solid #4b5563",
     cursor: "pointer",
     fontWeight: 500,
     fontSize: 14,

@@ -1,46 +1,47 @@
 // src/pages/ListDetailPage.js
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import api from "../api";
+import { useApiRequest } from "../hooks/useApiRequest";
+import LoadingIndicator from "../components/loadingIndicator";
+import ErrorMessage from "../components/errorMessage";
 
 const CURRENT_USER_ID = "user-1";
-
-// jednoduchý mock, jen pro vzhled a základní logiku
-const INITIAL_LISTS = [
-  {
-    id: "list-1",
-    name: "Penny - týdenní nákup",
-    ownerId: "user-1",
-    ownerName: "Matyáš Novák",
-    items: ["Mléko", "Chleba"],
-  },
-  {
-    id: "list-2",
-    name: "Lidl - párty nákup",
-    ownerId: "user-1",
-    ownerName: "Matyáš Novák",
-    items: ["Brambůrky", "Kola"],
-  },
-  {
-    id: "list-3",
-    name: "Billa - minulý měsíc",
-    ownerId: "user-2",
-    ownerName: "Jana",
-    items: ["Voda", "Vodka 1L", "Pomeranče 0,5kg", "Rohlíky 5ks"],
-  },
-];
 
 export default function ListDetailPage() {
   const nav = useNavigate();
   const { id } = useParams();
 
-  const initialList = INITIAL_LISTS.find((l) => l.id === id) || null;
+  const {
+    status,
+    data: list,
+    error,
+    execute: loadList,
+  } = useApiRequest(() => api.getShoppingListById(id));
 
-  const [name, setName] = useState(initialList ? initialList.name : "");
-  const [items, setItems] = useState(initialList ? initialList.items : []);
+  const [name, setName] = useState("");
+  const [items, setItems] = useState([]);
   const [newItem, setNewItem] = useState("");
 
-  const isOwner =
-    initialList && initialList.ownerId === CURRENT_USER_ID;
+  useEffect(() => {
+    loadList();
+  }, [loadList]);
+
+  // Když se poprvé načte list, propsat do lokálního stavu
+useEffect(() => {
+  if (list) {
+    setName(list.name || "");
+
+    // převedeme items na pole stringů
+    const normalizedItems = (list.items || []).map((it) =>
+      typeof it === "string" ? it : it.text
+    );
+
+    setItems(normalizedItems);
+  }
+}, [list]);
+
+  const isOwner = list && list.ownerId === CURRENT_USER_ID;
 
   const addItem = () => {
     const trimmed = newItem.trim();
@@ -53,15 +54,82 @@ export default function ListDetailPage() {
     setItems((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleSave = () => {
-    // tady by se normálně volalo API / propsalo do globálního stavu
-    nav("/list");
+  const handleSave = async () => {
+    try {
+      await api.updateShoppingList(id, { name, items });
+      nav("/list");
+    } catch (e) {
+      console.error(e);
+      alert("Nepodařilo se uložit změny seznamu.");
+    }
   };
 
   const handleCancel = () => {
     nav("/list");
   };
 
+  // 🔄 PENDING
+  if (status === "pending" && !list) {
+    return (
+      <div style={s.page}>
+        <div style={s.container}>
+          <header style={s.header}>
+            <div>
+              <h1 style={s.title}>Detail nákupního seznamu</h1>
+              <p style={s.subtitle}>
+                Zobrazení a úprava existujícího nákupního seznamu.
+              </p>
+            </div>
+            <div>
+              <Link to="/list" style={s.linkBack}>
+                ← Zpět na přehled
+              </Link>
+            </div>
+          </header>
+
+          <div style={s.card}>
+            <loadingIndicator text="Načítám seznam..." />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ❌ ERROR
+  if (status === "error") {
+    return (
+      <div style={s.page}>
+        <div style={s.container}>
+          <header style={s.header}>
+            <div>
+              <h1 style={s.title}>Detail nákupního seznamu</h1>
+              <p style={s.subtitle}>
+                Zobrazení a úprava existujícího nákupního seznamu.
+              </p>
+            </div>
+            <div>
+              <Link to="/list" style={s.linkBack}>
+                ← Zpět na přehled
+              </Link>
+            </div>
+          </header>
+
+          <div style={s.card}>
+            <errorMessage
+              message="Nepodařilo se načíst seznam."
+              detail={error?.message}
+              onRetry={loadList}
+            />
+            <Link to="/list" style={s.linkBack}>
+              ← Zpět na přehled
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ✅ READY
   return (
     <div style={s.page}>
       <div style={s.container}>
@@ -79,97 +147,88 @@ export default function ListDetailPage() {
           </div>
         </header>
 
-        {!initialList ? (
-          <div style={s.card}>
-            <p>Seznam nebyl nalezen.</p>
-            <Link to="/list" style={s.linkBack}>
-              ← Zpět na přehled
-            </Link>
+        <div style={s.card}>
+          {/* Název seznamu */}
+          <div style={s.field}>
+            <label style={s.label}>Název seznamu</label>
+            <input
+              style={s.input}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
           </div>
-        ) : (
-          <div style={s.card}>
-            {/* Název seznamu */}
-            <div style={s.field}>
-              <label style={s.label}>Název seznamu</label>
-              <input
-                style={s.input}
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
-            </div>
 
-            {/* Vlastník */}
-            <div style={s.field}>
-              <label style={s.label}>Vlastník</label>
-              <input
-                style={{ ...s.input, color: "#6b7280", background: "#fff" }}
-                value={isOwner ? "Vy" : initialList.ownerName}
-                readOnly
-              />
-            </div>
+          {/* Vlastník */}
+          <div style={s.field}>
+            <label style={s.label}>Vlastník</label>
+            <input
+              style={{ ...s.input, color: "#6b7280", background: "#fff" }}
+              value={isOwner ? "Vy" : list.ownerName}
+              readOnly
+            />
+          </div>
 
-            {/* Členové */}
-            <div style={s.field}>
-              <label style={s.label}>Členové</label>
-              <input
-                style={{ ...s.input, color: "#6b7280", background: "#fff" }}
-                value="Zatím žádní členové"
-                readOnly
-              />
-            </div>
+          {/* Členové – zatím dummy */}
+          <div style={s.field}>
+            <label style={s.label}>Členové</label>
+            <input
+              style={{ ...s.input, color: "#6b7280", background: "#fff" }}
+              value="Zatím žádní členové"
+              readOnly
+            />
+          </div>
 
-            {/* Položky */}
-            <div style={s.field}>
-              <label style={s.label}>Položky</label>
+          {/* Položky */}
+          <div style={s.field}>
+            <label style={s.label}>Položky</label>
 
-              <ul style={s.itemsList}>
-                {items.map((it, i) => (
-                  <li key={i} style={s.itemRow}>
-                    <span>{it}</span>
-                    {isOwner && (
-                      <button
-                        style={s.deleteSmallButton}
-                        onClick={() => removeItem(i)}
-                      >
-                        Smazat
-                      </button>
-                    )}
-                  </li>
-                ))}
-                {items.length === 0 && (
-                  <li style={s.emptyText}>Žádné položky.</li>
-                )}
-              </ul>
-
-              {isOwner && (
-                <div style={s.addRow}>
-                  <input
-                    style={s.input}
-                    placeholder="Nová položka"
-                    value={newItem}
-                    onChange={(e) => setNewItem(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && addItem()}
-                  />
-                  <button style={s.secondaryButton} onClick={addItem}>
-                    Přidat položku
-                  </button>
-                </div>
+            <ul style={s.itemsList}>
+              {items.map((it, i) => (
+                <li key={i} style={s.itemRow}>
+                  <span>{it}</span>
+                  {isOwner && (
+                    <button
+                      style={s.deleteSmallButton}
+                      onClick={() => removeItem(i)}
+                    >
+                      Smazat
+                    </button>
+                  )}
+                </li>
+              ))}
+              {items.length === 0 && (
+                <li style={s.emptyText}>Žádné položky.</li>
               )}
-            </div>
+            </ul>
 
-            {/* Spodní tlačítka */}
-            <div style={s.footerButtons}>
-              <button style={s.cancelButton} onClick={handleCancel}>
-                Zrušit
-              </button>
-              {isOwner && (
-                <button style={s.primaryButton} onClick={handleSave}>
-                  Uložit změny
+            {isOwner && (
+              <div style={s.addRow}>
+                <input
+                  style={s.input}
+                  placeholder="Nová položka"
+                  value={newItem}
+                  onChange={(e) => setNewItem(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && addItem()}
+                />
+                <button style={s.secondaryButton} onClick={addItem}>
+                  Přidat položku
                 </button>
-              )}
-            </div>
+              </div>
+            )}
           </div>
-        )}
+
+          {/* Spodní tlačítka */}
+          <div style={s.footerButtons}>
+            <button style={s.cancelButton} onClick={handleCancel}>
+              Zrušit
+            </button>
+            {isOwner && (
+              <button style={s.primaryButton} onClick={handleSave}>
+                Uložit změny
+              </button>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

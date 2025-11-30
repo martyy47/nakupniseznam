@@ -1,7 +1,9 @@
 // src/pages/NewListPage.js
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import api from "../api";
 
+const CURRENT_USER_ID = "user-1";
 const CURRENT_USER_NAME = "Matyáš Novák";
 
 export default function NewListPage() {
@@ -10,6 +12,7 @@ export default function NewListPage() {
   const [name, setName] = useState("");
   const [items, setItems] = useState(["Mléko", "Chleba"]);
   const [newItem, setNewItem] = useState("");
+  const [saving, setSaving] = useState(false);
 
   const addItem = () => {
     const trimmed = newItem.trim();
@@ -22,9 +25,26 @@ export default function NewListPage() {
     setItems((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleSave = () => {
-    // tady by se normálně volalo API / přidalo do seznamů
-    nav("/list");
+  const handleSave = async () => {
+    if (!name.trim()) {
+      alert("Zadej název seznamu.");
+      return;
+    }
+    setSaving(true);
+    try {
+      await api.createShoppingList({
+        name,
+        ownerId: CURRENT_USER_ID,
+        ownerName: CURRENT_USER_NAME,
+        items,
+      });
+      nav("/list");
+    } catch (e) {
+      console.error(e);
+      alert("Nepodařilo se uložit nový seznam.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleCancel = () => {
@@ -66,19 +86,19 @@ export default function NewListPage() {
             <div style={s.readonlyBox}>{CURRENT_USER_NAME}</div>
           </div>
 
-        {/* Členové */}
-        <div style={s.field}>
-          <label style={s.label}>Členové</label>
-          <input
-            style={{ 
-              ...s.input, 
-              color: "#6b7280",        // světle šedý text
-              background: "#fff"       // stejné jako Název seznamu
-          }}
-          value="Zatím žádní členové"
-          readOnly
-        />
-      </div>
+          {/* Členové */}
+          <div style={s.field}>
+            <label style={s.label}>Členové</label>
+            <input
+              style={{
+                ...s.input,
+                color: "#6b7280", // světle šedý text
+                background: "#fff", // stejné jako Název seznamu
+              }}
+              value="Zatím žádní členové"
+              readOnly
+            />
+          </div>
 
           {/* Položky */}
           <div style={s.field}>
@@ -120,8 +140,12 @@ export default function NewListPage() {
             <button style={s.cancelButton} onClick={handleCancel}>
               Zrušit
             </button>
-            <button style={s.primaryButton} onClick={handleSave}>
-              Uložit seznam
+            <button
+              style={s.primaryButton}
+              onClick={handleSave}
+              disabled={saving}
+            >
+              {saving ? "Ukládám..." : "Uložit seznam"}
             </button>
           </div>
         </div>

@@ -1,20 +1,34 @@
 // src/pages/ArchivePage.js
-import React, { useState } from "react";
+import React, { useMemo, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import api from "../api";
+import { useApiRequest } from "../hooks/useApiRequest";
+import LoadingIndicator from "../components/loadingIndicator";
+import ErrorMessage from "../components/errorMessage";
 
 const CURRENT_USER_ID = "user-1";
 
-const INITIAL_ARCHIVE = [
-  { id: "list-3", name: "Billa - minulý měsíc", ownerId: "user-2", ownerName: "Jana" },
-  { id: "list-5", name: "Tesco - velký nákup", ownerId: "user-1", ownerName: "Matyáš Novák" },
-];
-
 export default function ArchivePage() {
   const nav = useNavigate();
-  const [lists, setLists] = useState(INITIAL_ARCHIVE);
+
+  const {
+    status,
+    data: lists,
+    error,
+    execute: loadLists,
+    setData: setLists,
+  } = useApiRequest(api.getShoppingLists);
 
   const [toDeleteOne, setToDeleteOne] = useState(null);
   const [toDeleteAll, setToDeleteAll] = useState(false);
+
+  useEffect(() => {
+    loadLists();
+  }, [loadLists]);
+
+  const archivedLists = useMemo(() => {
+    return (lists || []).filter((l) => l.archived);
+  }, [lists]);
 
   const openDetail = (id) => {
     nav(`/list/${id}`);
@@ -24,9 +38,17 @@ export default function ArchivePage() {
   const askDeleteOne = (list) => setToDeleteOne(list);
 
   // potvrzení odstranění jednoho listu
-  const confirmDeleteOne = () => {
-    setLists((prev) => prev.filter((l) => l.id !== toDeleteOne.id));
-    setToDeleteOne(null);
+  const confirmDeleteOne = async () => {
+    if (!toDeleteOne) return;
+    try {
+      await api.deleteShoppingList(toDeleteOne.id);
+      setLists((prev) => (prev || []).filter((l) => l.id !== toDeleteOne.id));
+    } catch (e) {
+      console.error(e);
+      alert("Nepodařilo se smazat archivovaný seznam.");
+    } finally {
+      setToDeleteOne(null);
+    }
   };
 
   const cancelDeleteOne = () => setToDeleteOne(null);
@@ -34,20 +56,69 @@ export default function ArchivePage() {
   // otevře modál „smazat všechny“
   const askDeleteAll = () => setToDeleteAll(true);
 
-  const confirmDeleteAll = () => {
-    setLists([]);
-    setToDeleteAll(false);
+  const confirmDeleteAll = async () => {
+    try {
+      const ids = archivedLists.map((l) => l.id);
+      await Promise.all(ids.map((id) => api.deleteShoppingList(id)));
+      setLists((prev) => (prev || []).filter((l) => !l.archived));
+    } catch (e) {
+      console.error(e);
+      alert("Nepodařilo se smazat všechny archivované seznamy.");
+    } finally {
+      setToDeleteAll(false);
+    }
   };
 
   const cancelDeleteAll = () => setToDeleteAll(false);
 
+  // 🔄 PENDING
+  if (status === "pending" && !lists) {
+    return (
+      <div style={s.page}>
+        <header style={s.header}>
+          <h1>Archivované seznamy</h1>
+          <div style={s.headerRight}>
+            <Link to="/list" style={s.backLink}>
+              ← Zpět na přehled
+            </Link>
+          </div>
+        </header>
+
+        <loadingIndicator text="Načítám archivované seznamy..." />
+      </div>
+    );
+  }
+
+  // ❌ ERROR
+  if (status === "error") {
+    return (
+      <div style={s.page}>
+        <header style={s.header}>
+          <h1>Archivované seznamy</h1>
+          <div style={s.headerRight}>
+            <Link to="/list" style={s.backLink}>
+              ← Zpět na přehled
+            </Link>
+          </div>
+        </header>
+
+        <errorMessage
+          message="Nepodařilo se načíst archivované seznamy."
+          detail={error?.message}
+          onRetry={loadLists}
+        />
+      </div>
+    );
+  }
+
+  // ✅ READY
   return (
     <div style={s.page}>
       <header style={s.header}>
         <h1>Archivované seznamy</h1>
 
         <div style={s.headerRight}>
-          {lists.length > 0 && (
+          {archivedLists.length > 0 && (
             <button style={s.deleteAllButton} onClick={askDeleteAll}>
               Smazat všechny archivované
             </button>
@@ -60,11 +131,11 @@ export default function ArchivePage() {
       </header>
 
       <div style={s.grid}>
-        {lists.length === 0 && (
+        {archivedLists.length === 0 && (
           <div style={s.emptyText}>Archiv je prázdný.</div>
         )}
 
-        {lists.map((list) => {
+        {archivedLists.map((list) => {
           const isOwner = list.ownerId === CURRENT_USER_ID;
           return (
             <div key={list.id} style={s.card}>
