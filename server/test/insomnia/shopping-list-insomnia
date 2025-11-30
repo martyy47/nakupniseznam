@@ -1,0 +1,259 @@
+type: collection.insomnia.rest/5.0
+name: Shopping List API
+meta:
+  id: wrk_b8e37a80556b4a37b2e0f858410b74f6
+  created: 1764530340114
+  modified: 1764530340114
+collection:
+  - url: http://localhost:3001/shoppingList/create
+    name: shoppingList/create
+    meta:
+      id: req_ebd2fe43e5e64f17b92a97d62e4602df
+      created: 1764530352588
+      modified: 1764530456827
+      isPrivate: false
+      sortKey: -1764530352588
+    method: POST
+    body:
+      mimeType: application/json
+      text: |-
+        {
+          "name": "Testovací seznam"
+        }
+    headers:
+      - name: Content-Type
+        value: application/json
+      - name: User-Agent
+        value: insomnia/11.0.2
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: http://localhost:3001/shoppingList/get?id=692c991da5fa6110aa3f1cc0
+    name: shoppingList/get
+    meta:
+      id: req_b72b5087278e4b9e89035c4f37b2de78
+      created: 1764531169772
+      modified: 1764531905399
+      isPrivate: false
+      sortKey: -1764531169772
+    method: GET
+    headers:
+      - name: User-Agent
+        value: insomnia/11.0.2
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: http://localhost:3001/shoppingList/listMy?pageIndex=0&pageSize=20
+    name: shoppingList/listMy
+    meta:
+      id: req_a6889beba29d4ca18afea91ff6061918
+      created: 1764531440599
+      modified: 1764532116376
+      isPrivate: false
+      sortKey: -1764531440599
+    method: GET
+    headers:
+      - name: User-Agent
+        value: insomnia/11.0.2
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: http://localhost:3001/shoppingList/delete
+    name: shoppingList/delete
+    meta:
+      id: req_7d37a35030ec4917bc62bd87852ab693
+      created: 1764531511449
+      modified: 1764531595550
+      isPrivate: false
+      sortKey: -1764531511449
+    method: POST
+    body:
+      mimeType: application/json
+      text: |-
+        {
+          "id": "692c991da5fa6110aa3f1cc0"
+        }
+    headers:
+      - name: Content-Type
+        value: application/json
+      - name: User-Agent
+        value: insomnia/11.0.2
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: http://localhost:3001/item/add
+    name: item/add
+    meta:
+      id: req_5743d08e687e461389184756fda388e7
+      created: 1764532143402
+      modified: 1764532293094
+      isPrivate: false
+      sortKey: -1764532143402
+    method: POST
+    body:
+      mimeType: application/json
+      text: |-
+        {
+          "listId": "692c9e84a5fa6110aa3f1cc7",
+          "name": "Mléko 1L"
+        }
+    headers:
+      - name: Content-Type
+        value: application/json
+      - name: User-Agent
+        value: insomnia/11.0.2
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: http://localhost:3001/item/update
+    name: item/update
+    meta:
+      id: req_10168fbbe2694eae89f611665b2bd181
+      created: 1764532309772
+      modified: 1764532421195
+      isPrivate: false
+      sortKey: -1764532309772
+    method: POST
+    body:
+      mimeType: application/json
+      text: |-
+        {
+          "id": "692ca038a5fa6110aa3f1ccd",
+          "isDone": true
+        }
+    headers:
+      - name: Content-Type
+        value: application/json
+      - name: User-Agent
+        value: insomnia/11.0.2
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: http://localhost:3001/item/delete
+    name: item/delete
+    meta:
+      id: req_1dd5766437e14beaa31286e4bd16c251
+      created: 1764532424379
+      modified: 1764532463984
+      isPrivate: false
+      sortKey: -1764532424379
+    method: POST
+    body:
+      mimeType: application/json
+      text: |
+        {
+          "id": "692ca038a5fa6110aa3f1ccd"
+        }
+    headers:
+      - name: Content-Type
+        value: application/json
+      - name: User-Agent
+        value: insomnia/11.0.2
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: http://localhost:3001/invitation/create
+    name: invitation/create
+    meta:
+      id: req_4852b81488ab47c4b17e060cc4b79d9c
+      created: 1764532483217
+      modified: 1764532540326
+      isPrivate: false
+      sortKey: -1764532483217
+    method: POST
+    body:
+      mimeType: application/json
+      text: |-
+        {
+          "listId": "692c9e84a5fa6110aa3f1cc7",
+          "inviteeEmail": "petr@example.com"
+        }
+    headers:
+      - name: Content-Type
+        value: application/json
+      - name: User-Agent
+        value: insomnia/11.0.2
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: http://localhost:3001/invitation/accept
+    name: invitation/accept
+    meta:
+      id: req_4345f1f4de5e4fc7adbbe7123be0475e
+      created: 1764532556518
+      modified: 1764532601235
+      isPrivate: false
+      sortKey: -1764532556518
+    method: POST
+    body:
+      mimeType: application/json
+      text: |-
+        {
+          "token": "3a2627cbf184eeffbd14da4cfc2e4588"
+        }
+    headers:
+      - name: Content-Type
+        value: application/json
+      - name: User-Agent
+        value: insomnia/11.0.2
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+cookieJar:
+  name: Default Jar
+  meta:
+    id: jar_b3d3409814633af42b0d5aef9a44ee5b9acbbbfd
+    created: 1764530340128
+    modified: 1764530340128
+environments:
+  name: Base Environment
+  meta:
+    id: env_b3d3409814633af42b0d5aef9a44ee5b9acbbbfd
+    created: 1764530340126
+    modified: 1764530340126
+    isPrivate: false
