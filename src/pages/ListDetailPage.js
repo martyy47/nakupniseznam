@@ -3,8 +3,8 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import api from "../api";
 import { useApiRequest } from "../hooks/useApiRequest";
-import LoadingIndicator from "../components/loadingIndicator";
-import ErrorMessage from "../components/errorMessage";
+import LoadingIndicator from "../components/LoadingIndicator";
+import ErrorMessage from "../components/ErrorMessage";
 
 const CURRENT_USER_ID = "user-1";
 
@@ -88,7 +88,7 @@ useEffect(() => {
           </header>
 
           <div style={s.card}>
-            <loadingIndicator text="Načítám seznam..." />
+            <LoadingIndicator text="Načítám seznam..." />
           </div>
         </div>
       </div>
@@ -115,7 +115,7 @@ useEffect(() => {
           </header>
 
           <div style={s.card}>
-            <errorMessage
+            <ErrorMessage
               message="Nepodařilo se načíst seznam."
               detail={error?.message}
               onRetry={loadList}

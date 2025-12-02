@@ -3,8 +3,8 @@ import React, { useMemo, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../api";
 import { useApiRequest } from "../hooks/useApiRequest";
-//import LoadingIndicator from "../components/loadingIndicator";
-//import ErrorMessage from "../components/errorMessage";
+import LoadingIndicator from "../components/LoadingIndicator";
+import ErrorMessage from "../components/ErrorMessage";
 
 const CURRENT_USER_ID = "user-1";
 
@@ -84,7 +84,7 @@ export default function ArchivePage() {
           </div>
         </header>
 
-        <loadingIndicator text="Načítám archivované seznamy..." />
+        <LoadingIndicator text="Načítám archivované seznamy..." />
       </div>
     );
   }
@@ -102,7 +102,7 @@ export default function ArchivePage() {
           </div>
         </header>
 
-        <errorMessage
+        <ErrorMessage
           message="Nepodařilo se načíst archivované seznamy."
           detail={error?.message}
           onRetry={loadLists}

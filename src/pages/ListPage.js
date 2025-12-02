@@ -3,8 +3,8 @@ import React, { useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api";
 import { useApiRequest } from "../hooks/useApiRequest";
-import LoadingIndicator from "../components/loadingIndicator";
-import ErrorMessage from "../components/errorMessage";
+import LoadingIndicator from "../components/LoadingIndicator";
+import ErrorMessage from "../components/ErrorMessage";
 
 const CURRENT_USER_ID = "user-1";
 
@@ -75,7 +75,7 @@ export default function ListPage() {
           </div>
         </header>
 
-        <loadingIndicator text="Načítám nákupní seznamy..." />
+        <LoadingIndicator text="Načítám nákupní seznamy..." />
       </div>
     );
   }
@@ -96,7 +96,7 @@ export default function ListPage() {
           </div>
         </header>
 
-        <errorMessage
+        <ErrorMessage
           message="Nepodařilo se načíst nákupní seznamy."
           detail={error?.message}
           onRetry={loadLists}
