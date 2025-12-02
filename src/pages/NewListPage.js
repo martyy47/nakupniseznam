@@ -10,7 +10,7 @@ export default function NewListPage() {
   const nav = useNavigate();
 
   const [name, setName] = useState("");
-  const [items, setItems] = useState(["Mléko", "Chleba"]);
+  const [items, setItems] = useState([/*"Mléko", "Chleba"*/]); // mock data nepotřebná
   const [newItem, setNewItem] = useState("");
   const [saving, setSaving] = useState(false);
 
