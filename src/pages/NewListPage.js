@@ -10,9 +10,12 @@ export default function NewListPage() {
   const nav = useNavigate();
 
   const [name, setName] = useState("");
-  const [items, setItems] = useState([/*"Mléko", "Chleba"*/]); // mock data nepotřebná
+  const [items, setItems] = useState([]); // nový seznam je prázdný
   const [newItem, setNewItem] = useState("");
   const [saving, setSaving] = useState(false);
+
+  // Stav pro naše "hezké" vyskakovací okno
+  const [dialogMessage, setDialogMessage] = useState(null);
 
   const addItem = () => {
     const trimmed = newItem.trim();
@@ -27,7 +30,8 @@ export default function NewListPage() {
 
   const handleSave = async () => {
     if (!name.trim()) {
-      alert("Zadej název seznamu.");
+      // místo alert("Zadej název seznamu.");
+      setDialogMessage("Zadejte název seznamu.");
       return;
     }
     setSaving(true);
@@ -41,7 +45,8 @@ export default function NewListPage() {
       nav("/list");
     } catch (e) {
       console.error(e);
-      alert("Nepodařilo se uložit nový seznam.");
+      // místo alert("Nepodařilo se uložit nový seznam.");
+      setDialogMessage("Nepodařilo se uložit nový seznam.");
     } finally {
       setSaving(false);
     }
@@ -150,6 +155,24 @@ export default function NewListPage() {
           </div>
         </div>
       </div>
+
+      {/* Hezké modální okno místo web local host alertu */}
+      {dialogMessage && (
+        <div style={s.modalOverlay}>
+          <div style={s.modal}>
+            <h2 style={s.modalTitle}>Upozornění</h2>
+            <p style={s.modalText}>{dialogMessage}</p>
+            <div style={s.modalButtons}>
+              <button
+                style={s.primaryButton}
+                onClick={() => setDialogMessage(null)}
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -161,6 +184,7 @@ const s = {
     padding: "40px 60px",
     fontFamily: "Arial, sans-serif",
     boxSizing: "border-box",
+    position: "relative",
   },
   container: {
     maxWidth: 900,
@@ -291,5 +315,39 @@ const s = {
     border: "1px solid #ee1111ff",
     cursor: "pointer",
     fontWeight: 600,
+  },
+
+  // Styl pro modální okno
+  modalOverlay: {
+    position: "fixed",
+    inset: 0,
+    background: "rgba(15,23,42,0.45)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 1000,
+  },
+  modal: {
+    background: "#ffffff",
+    borderRadius: 16,
+    padding: 24,
+    maxWidth: 420,
+    width: "90%",
+    boxShadow: "0 20px 40px rgba(0,0,0,0.15)",
+  },
+  modalTitle: {
+    margin: 0,
+    fontSize: 18,
+    fontWeight: 700,
+  },
+  modalText: {
+    marginTop: 12,
+    marginBottom: 20,
+    fontSize: 14,
+    color: "#4b5563",
+  },
+  modalButtons: {
+    display: "flex",
+    justifyContent: "flex-end",
   },
 };
