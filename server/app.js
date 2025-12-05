@@ -25,13 +25,19 @@ app.use("/item", itemRouter);
 app.use("/invitation", invitationRouter);
 
 // ===== Start server + Mongo =====
-connect()
-  .then(() => {
-    app.listen(PORT, () => {
-      console.log(`✅ BE listening on http://localhost:${PORT}`);
+// Když NEběží testy, normálně se připojíme k DB a pustíme server.
+if (process.env.NODE_ENV !== "test") {
+  connect()
+    .then(() => {
+      app.listen(PORT, () => {
+        console.log(`✅ BE listening on http://localhost:${PORT}`);
+      });
+    })
+    .catch((err) => {
+      console.error("❌ Failed to connect to MongoDB:", err);
+      process.exit(1);
     });
-  })
-  .catch((err) => {
-    console.error("❌ Failed to connect to MongoDB:", err);
-    process.exit(1);
-  });
+}
+
+// Tohle je klíčové pro testy:
+module.exports = app;
