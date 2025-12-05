@@ -5,8 +5,15 @@ import api from "../api";
 import { useApiRequest } from "../hooks/useApiRequest";
 import LoadingIndicator from "../components/LoadingIndicator";
 import ErrorMessage from "../components/ErrorMessage";
+import SettingsModal from "../components/SettingsModal";
+import IconSettings from "../components/icons/IconSettings";
 
 const CURRENT_USER_ID = "user-1";
+const CURRENT_USER = {
+  id: "user-1",
+  name: "Matyáš Novák",
+  email: "matyas.novak@example.com",
+};
 
 export default function ListPage() {
   const nav = useNavigate();
@@ -22,6 +29,11 @@ export default function ListPage() {
   useEffect(() => {
     loadLists();
   }, [loadLists]);
+
+  // nastavení – modal + theme + language (zatím jen lokálně)
+  const [isSettingsOpen, setIsSettingsOpen] = React.useState(false);
+  const [theme, setTheme] = React.useState("light");
+  const [language, setLanguage] = React.useState("cs");
 
   // ✅ /list = vždy jen nearchivované seznamy
   const visibleLists = useMemo(() => {
@@ -59,6 +71,16 @@ export default function ListPage() {
 
   const cancelDelete = () => setToDelete(null);
 
+  const settingsButton = (
+    <button
+      style={s.settingsButton}
+      onClick={() => setIsSettingsOpen(true)}
+      title="Uživatelské nastavení"
+    >
+      <IconSettings size={20} />
+    </button>
+  );
+
   // 🔄 PENDING
   if (status === "pending" && !lists) {
     return (
@@ -72,10 +94,21 @@ export default function ListPage() {
             <button style={s.primaryButton} onClick={openNewPage}>
               Nový seznam
             </button>
+            {settingsButton}
           </div>
         </header>
 
         <LoadingIndicator text="Načítám nákupní seznamy..." />
+
+        <SettingsModal
+          open={isSettingsOpen}
+          onClose={() => setIsSettingsOpen(false)}
+          theme={theme}
+          onThemeChange={setTheme}
+          language={language}
+          onLanguageChange={setLanguage}
+          user={CURRENT_USER}
+        />
       </div>
     );
   }
@@ -93,6 +126,7 @@ export default function ListPage() {
             <button style={s.primaryButton} onClick={openNewPage}>
               Nový seznam
             </button>
+            {settingsButton}
           </div>
         </header>
 
@@ -100,6 +134,16 @@ export default function ListPage() {
           message="Nepodařilo se načíst nákupní seznamy."
           detail={error?.message}
           onRetry={loadLists}
+        />
+
+        <SettingsModal
+          open={isSettingsOpen}
+          onClose={() => setIsSettingsOpen(false)}
+          theme={theme}
+          onThemeChange={setTheme}
+          language={language}
+          onLanguageChange={setLanguage}
+          user={CURRENT_USER}
         />
       </div>
     );
@@ -119,6 +163,8 @@ export default function ListPage() {
           <button style={s.primaryButton} onClick={openNewPage}>
             Nový seznam
           </button>
+
+          {settingsButton}
         </div>
       </header>
 
@@ -179,6 +225,17 @@ export default function ListPage() {
           </div>
         </div>
       )}
+
+      {/* Uživatelské nastavení */}
+      <SettingsModal
+        open={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        theme={theme}
+        onThemeChange={setTheme}
+        language={language}
+        onLanguageChange={setLanguage}
+        user={CURRENT_USER}
+      />
     </div>
   );
 }
@@ -300,5 +357,18 @@ const s = {
     cursor: "pointer",
     fontWeight: 500,
     fontSize: 14,
+  },
+  settingsButton: {
+    background: "#e5e7eb",
+    color: "#111827",
+    width: 42,
+    height: 42,
+    borderRadius: "50%",
+    border: "1px solid #d1d5db",
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    transition: "background 0.15s, transform 0.15s",
   },
 };
