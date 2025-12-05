@@ -7,6 +7,7 @@ import LoadingIndicator from "../components/LoadingIndicator";
 import ErrorMessage from "../components/ErrorMessage";
 import SettingsModal from "../components/SettingsModal";
 import IconSettings from "../components/icons/IconSettings";
+import { useTheme } from "../components/theme/ThemeContext";
 
 const CURRENT_USER_ID = "user-1";
 const CURRENT_USER = {
@@ -17,6 +18,7 @@ const CURRENT_USER = {
 
 export default function ListPage() {
   const nav = useNavigate();
+  const { theme, setTheme } = useTheme();
 
   const {
     status,
@@ -30,10 +32,8 @@ export default function ListPage() {
     loadLists();
   }, [loadLists]);
 
-  // nastavení – modal + theme + language (zatím jen lokálně)
   const [isSettingsOpen, setIsSettingsOpen] = React.useState(false);
-  const [theme, setTheme] = React.useState("light");
-  const [language, setLanguage] = React.useState("cs");
+  const [language, setLanguage] = React.useState("cs"); // jazyk zatím lokálně, context doděláme pak
 
   // ✅ /list = vždy jen nearchivované seznamy
   const visibleLists = useMemo(() => {
@@ -243,10 +243,11 @@ export default function ListPage() {
 const s = {
   page: {
     minHeight: "100vh",
-    background: "#eef1f7",
+    background: "var(--bg-page)",
     padding: "40px 60px",
     fontFamily: "Arial, sans-serif",
     boxSizing: "border-box",
+    color: "var(--text-main)",
   },
   header: {
     display: "flex",
@@ -265,21 +266,22 @@ const s = {
     gap: 24,
   },
   card: {
-    background: "#fff",
+    background: "var(--bg-card)",
     padding: 22,
     borderRadius: 16,
     boxShadow: "0 6px 18px rgba(0,0,0,0.1)",
     transition: "0.15s",
+    border: "1px solid var(--border-color)",
   },
   cardTitle: {
     fontSize: 19,
     fontWeight: 600,
     marginBottom: 8,
-    color: "#111",
+    color: "var(--text-main)",
   },
   ownerNote: {
     fontSize: 13,
-    color: "#555",
+    color: "var(--text-muted)",
     marginBottom: 12,
   },
   cardButtons: {
@@ -295,13 +297,13 @@ const s = {
     fontWeight: 500,
   },
   deleteButton: {
-    background: "#fee2e2",
-    border: "1px solid #ee1111ff",
-    color: "#ee1111ff",
-    padding: "7px 16px",
-    borderRadius: 8,
-    cursor: "pointer",
-    fontWeight: 600,
+  background: "var(--delete-bg)",
+  border: "1px solid #ee1111ff",
+  color: "#ee1111ff",
+  padding: "7px 16px",
+  borderRadius: 8,
+  cursor: "pointer",
+  fontWeight: 600,
   },
   primaryButton: {
     background: "#2563eb",
@@ -324,7 +326,7 @@ const s = {
     fontSize: 14,
   },
   emptyText: {
-    color: "#666",
+    color: "var(--text-muted)",
     fontStyle: "italic",
   },
   modalOverlay: {
@@ -337,11 +339,13 @@ const s = {
     zIndex: 1000,
   },
   modal: {
-    background: "#fff",
+    background: "var(--bg-card)",
+    color: "var(--text-main)",
     padding: 30,
     borderRadius: 14,
     width: 420,
     boxShadow: "0 10px 30px rgba(0,0,0,0.25)",
+    border: "1px solid var(--border-color)",
   },
   modalButtons: {
     display: "flex",

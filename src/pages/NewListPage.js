@@ -30,7 +30,6 @@ export default function NewListPage() {
 
   const handleSave = async () => {
     if (!name.trim()) {
-      // místo alert("Zadej název seznamu.");
       setDialogMessage("Zadejte název seznamu.");
       return;
     }
@@ -45,7 +44,6 @@ export default function NewListPage() {
       nav("/list");
     } catch (e) {
       console.error(e);
-      // místo alert("Nepodařilo se uložit nový seznam.");
       setDialogMessage("Nepodařilo se uložit nový seznam.");
     } finally {
       setSaving(false);
@@ -62,9 +60,7 @@ export default function NewListPage() {
         <header style={s.header}>
           <div>
             <h1 style={s.title}>Nový nákupní seznam</h1>
-            <p style={s.subtitle}>
-              Vytvoř si nový seznam a přidej položky.
-            </p>
+            <p style={s.subtitle}>Vytvoř si nový seznam a přidej položky.</p>
           </div>
           <div>
             <Link to="/list" style={s.linkBack}>
@@ -97,8 +93,7 @@ export default function NewListPage() {
             <input
               style={{
                 ...s.input,
-                color: "#6b7280", // světle šedý text
-                background: "#fff", // stejné jako Název seznamu
+                color: "var(--text-muted)",
               }}
               value="Zatím žádní členové"
               readOnly
@@ -180,11 +175,12 @@ export default function NewListPage() {
 const s = {
   page: {
     minHeight: "100vh",
-    background: "#eef1f7",
+    background: "var(--bg-page)",
     padding: "40px 60px",
     fontFamily: "Arial, sans-serif",
     boxSizing: "border-box",
     position: "relative",
+    color: "var(--text-main)",
   },
   container: {
     maxWidth: 900,
@@ -202,7 +198,7 @@ const s = {
   },
   subtitle: {
     margin: "6px 0 0",
-    color: "#4b5563",
+    color: "var(--text-muted)",
     fontSize: 14,
   },
   linkBack: {
@@ -212,10 +208,11 @@ const s = {
   },
 
   card: {
-    background: "#fff",
+    background: "var(--bg-card)",
     borderRadius: 16,
     padding: 24,
     boxShadow: "0 6px 18px rgba(0,0,0,0.1)",
+    border: "1px solid var(--border-color)",
   },
 
   field: {
@@ -231,16 +228,19 @@ const s = {
     width: "100%",
     padding: "10px 12px",
     borderRadius: 8,
-    border: "1px solid #cbd5e1",
+    border: "1px solid var(--border-color)",
     fontSize: 15,
     boxSizing: "border-box",
+    background: "var(--bg-card)",
+    color: "var(--text-main)",
   },
   readonlyBox: {
     padding: "10px 12px",
     borderRadius: 8,
-    background: "#f3f4f6",
-    border: "1px solid #e5e7eb",
+    background: "var(--bg-page)",
+    border: "1px solid var(--border-color)",
     fontSize: 15,
+    color: "var(--text-main)",
   },
 
   itemsList: {
@@ -248,20 +248,20 @@ const s = {
     padding: 0,
     margin: "0 0 10px",
     borderRadius: 8,
-    border: "1px solid #e5e7eb",
-    background: "#f9fafb",
+    border: "1px solid var(--border-color)",
+    background: "var(--bg-card)",
   },
   itemRow: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
     padding: "8px 10px",
-    borderBottom: "1px solid #e5e7eb",
+    borderBottom: "1px solid var(--border-color)",
   },
   emptyText: {
     padding: "8px 10px",
     fontStyle: "italic",
-    color: "#6b7280",
+    color: "var(--text-muted)",
   },
   addRow: {
     display: "flex",
@@ -308,7 +308,7 @@ const s = {
     whiteSpace: "nowrap",
   },
   deleteSmallButton: {
-    background: "#fee2e2",
+    background: "var(--delete-bg)",
     color: "#ee1111ff",
     padding: "6px 12px",
     borderRadius: 8,
@@ -328,12 +328,14 @@ const s = {
     zIndex: 1000,
   },
   modal: {
-    background: "#ffffff",
+    background: "var(--bg-card)",
+    color: "var(--text-main)",
     borderRadius: 16,
     padding: 24,
     maxWidth: 420,
     width: "90%",
     boxShadow: "0 20px 40px rgba(0,0,0,0.15)",
+    border: "1px solid var(--border-color)",
   },
   modalTitle: {
     margin: 0,
@@ -344,7 +346,7 @@ const s = {
     marginTop: 12,
     marginBottom: 20,
     fontSize: 14,
-    color: "#4b5563",
+    color: "var(--text-muted)",
   },
   modalButtons: {
     display: "flex",

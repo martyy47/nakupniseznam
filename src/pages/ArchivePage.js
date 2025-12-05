@@ -212,10 +212,11 @@ export default function ArchivePage() {
 const s = {
   page: {
     minHeight: "100vh",
-    background: "#eef1f7",
+    background: "var(--bg-page)",
     padding: "40px 60px",
     fontFamily: "Arial, sans-serif",
     boxSizing: "border-box",
+    color: "var(--text-main)",
   },
   header: {
     display: "flex",
@@ -239,20 +240,21 @@ const s = {
     gap: 24,
   },
   card: {
-    background: "#fff",
+    background: "var(--bg-card)",
     padding: 22,
     borderRadius: 16,
     boxShadow: "0 6px 18px rgba(0,0,0,0.1)",
+    border: "1px solid var(--border-color)",
   },
   cardTitle: {
     fontSize: 19,
     fontWeight: 600,
     marginBottom: 8,
-    color: "#111",
+    color: "var(--text-main)",
   },
   ownerNote: {
     fontSize: 13,
-    color: "#555",
+    color: "var(--text-muted)",
     marginBottom: 12,
   },
   cardButtons: {
@@ -268,7 +270,7 @@ const s = {
     fontWeight: 500,
   },
   deleteButton: {
-    background: "#fee2e2",
+    background: "var(--delete-bg)",
     border: "1px solid #ee1111ff",
     color: "#ee1111ff",
     padding: "7px 16px",
@@ -277,7 +279,7 @@ const s = {
     fontWeight: 600,
   },
   emptyText: {
-    color: "#666",
+    color: "var(--text-muted)",
     fontStyle: "italic",
   },
   deleteAllButton: {
@@ -300,11 +302,13 @@ const s = {
     zIndex: 1000,
   },
   modal: {
-    background: "#fff",
+    background: "var(--bg-card)",
+    color: "var(--text-main)",
     padding: 30,
     borderRadius: 14,
     width: 420,
     boxShadow: "0 10px 30px rgba(0,0,0,0.25)",
+    border: "1px solid var(--border-color)",
   },
   modalButtons: {
     display: "flex",

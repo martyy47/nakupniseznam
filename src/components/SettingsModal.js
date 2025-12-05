@@ -12,9 +12,8 @@ export default function SettingsModal({
 }) {
   if (!open) return null;
 
-  const handleSave = () => {
-    onClose();
-  };
+  const setLight = () => onThemeChange("light");
+  const setDark = () => onThemeChange("dark");
 
   return (
     <div
@@ -30,7 +29,7 @@ export default function SettingsModal({
           <h2 style={{ margin: 0 }}>Uživatelské nastavení</h2>
         </div>
 
-        {/* User info (bez nadpisu!) */}
+        {/* User info */}
         <div style={styles.userInfo}>
           <div><strong>Jméno:</strong> {user?.name}</div>
           <div><strong>Email:</strong> {user?.email}</div>
@@ -40,27 +39,34 @@ export default function SettingsModal({
         {/* Theme */}
         <section style={styles.section}>
           <h3 style={styles.sectionTitle}>Vzhled</h3>
-          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            <label style={styles.radioRow}>
-              <input
-                type="radio"
-                name="theme"
-                value="light"
-                checked={theme === "light"}
-                onChange={() => onThemeChange("light")}
-              />
-              <span>Světlý režim</span>
-            </label>
-            <label style={styles.radioRow}>
-              <input
-                type="radio"
-                name="theme"
-                value="dark"
-                checked={theme === "dark"}
-                onChange={() => onThemeChange("dark")}
-              />
-              <span>Tmavý režim</span>
-            </label>
+
+          <div style={styles.themeToggle}>
+            <button
+              type="button"
+              onClick={setLight}
+              style={{
+                ...styles.themeOption,
+                ...(theme === "light" ? styles.themeOptionActive : {}),
+                borderRight: "1px solid var(--border-color)",
+                borderTopLeftRadius: 999,
+                borderBottomLeftRadius: 999,
+              }}
+            >
+              Světlý režim
+            </button>
+
+            <button
+              type="button"
+              onClick={setDark}
+              style={{
+                ...styles.themeOption,
+                ...(theme === "dark" ? styles.themeOptionActive : {}),
+                borderTopRightRadius: 999,
+                borderBottomRightRadius: 999,
+              }}
+            >
+              Tmavý režim
+            </button>
           </div>
         </section>
 
@@ -81,16 +87,9 @@ export default function SettingsModal({
         <div style={styles.footer}>
           <button
             onClick={onClose}
-            style={styles.cancelButton}
+            style={styles.closeButton}
           >
-            Zrušit
-          </button>
-
-          <button
-            onClick={handleSave}
-            style={styles.saveButton}
-          >
-            Uložit změny
+            Zavřít
           </button>
         </div>
       </div>
@@ -109,12 +108,14 @@ const styles = {
     zIndex: 1200,
   },
   modal: {
-    background: "#fff",
+    background: "var(--bg-card)",
+    color: "var(--text-main)",
     padding: 24,
     borderRadius: 14,
     width: "min(480px, 92vw)",
     boxShadow: "0 10px 30px rgba(0,0,0,0.25)",
     boxSizing: "border-box",
+    border: "1px solid var(--border-color)",
   },
   header: {
     marginBottom: 16,
@@ -125,6 +126,7 @@ const styles = {
     gap: 4,
     marginBottom: 18,
     fontSize: 14,
+    color: "var(--text-main)",
   },
   section: {
     marginBottom: 16,
@@ -133,27 +135,41 @@ const styles = {
     margin: "0 0 6px",
     fontSize: 15,
   },
-  radioRow: {
-    display: "flex",
-    alignItems: "center",
-    gap: 6,
+  themeToggle: {
+    display: "inline-flex",
+    borderRadius: 999,
+    border: "1px solid var(--border-color)",
+    overflow: "hidden",
+  },
+  themeOption: {
+    padding: "6px 14px",
     fontSize: 14,
+    border: "none",
+    background: "transparent",
+    color: "var(--text-main)",
+    cursor: "pointer",
+    minWidth: 110,
+  },
+  themeOptionActive: {
+    background: "#2563eb",
+    color: "#ffffff",
   },
   select: {
     width: "100%",
     padding: "6px 10px",
     borderRadius: 8,
-    border: "1px solid #d1d5db",
+    border: "1px solid var(--border-color)",
     fontSize: 14,
     boxSizing: "border-box",
+    background: "var(--bg-card)",
+    color: "var(--text-main)",
   },
   footer: {
     display: "flex",
     justifyContent: "flex-end",
-    gap: 10,
     marginTop: 20,
   },
-  cancelButton: {
+  closeButton: {
     background: "#e5e7eb",
     color: "#111827",
     padding: "8px 16px",
@@ -161,16 +177,6 @@ const styles = {
     border: "1px solid #d1d5db",
     cursor: "pointer",
     fontWeight: 500,
-    fontSize: 14,
-  },
-  saveButton: {
-    background: "#2563eb",
-    color: "#fff",
-    padding: "8px 16px",
-    borderRadius: 10,
-    border: "none",
-    cursor: "pointer",
-    fontWeight: 600,
     fontSize: 14,
   },
 };
