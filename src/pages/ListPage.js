@@ -172,12 +172,18 @@ export default function ListPage() {
 
         {visibleLists.map((list) => {
           const isOwner = list.ownerId === CURRENT_USER_ID;
+          const itemCount = Array.isArray(list.items) ? list.items.length : 0;
+
           return (
             <div key={list.id} style={s.card}>
               <div style={s.cardTitle}>{list.name}</div>
 
               <div style={s.ownerNote}>
                 {t("list.owner")}: {isOwner ? t("list.owner.you") : list.ownerName}
+              </div>
+
+              <div style={s.ownerNote}>
+                {t("list.itemsCount")}: {itemCount}
               </div>
 
               <div style={s.cardButtons}>
@@ -278,11 +284,12 @@ const s = {
   ownerNote: {
     fontSize: 13,
     color: "var(--text-muted)",
-    marginBottom: 12,
+    marginBottom: 6,
   },
   cardButtons: {
     display: "flex",
     justifyContent: "space-between",
+    marginTop: 8,
   },
   detailButton: {
     background: "#f1f5f9",

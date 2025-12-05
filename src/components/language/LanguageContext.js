@@ -27,7 +27,7 @@ const translations = {
     "list.owner.you": "Vy",
     "list.button.detail": "Zobrazit detail",
     "list.button.delete": "Smazat",
-
+    "list.itemsCount": "Počet položek",
     "list.delete.title": "Smazat nákupní seznam",
     "list.delete.questionPrefix": "Opravdu chceš smazat",
     "list.delete.cancel": "Zrušit",
@@ -139,7 +139,7 @@ const translations = {
     "list.owner.you": "You",
     "list.button.detail": "Show detail",
     "list.button.delete": "Delete",
-
+    "list.itemsCount": "Items count",
     "list.delete.title": "Delete shopping list",
     "list.delete.questionPrefix": "Do you really want to delete",
     "list.delete.cancel": "Cancel",
@@ -195,7 +195,7 @@ const translations = {
     "detail.validation.nameRequired": "Please enter the list name.",
     "detail.error.save": "Failed to save list changes.",
     "detail.owner.you": "You",
-    
+
     // New list page
     "newList.title": "New shopping list",
     "newList.subtitle": "Create a new list and add items.",
