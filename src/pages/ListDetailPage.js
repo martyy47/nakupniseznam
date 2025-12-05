@@ -21,6 +21,7 @@ export default function ListDetailPage() {
     execute: loadList,
   } = useApiRequest(() => api.getShoppingListById(id));
 
+  // items = { text: string, done: bool }
   const [name, setName] = useState("");
   const [items, setItems] = useState([]);
   const [newItem, setNewItem] = useState("");
@@ -37,10 +38,18 @@ export default function ListDetailPage() {
     if (list) {
       setName(list.name || "");
 
-      // převedeme items na pole stringů
-      const normalizedItems = (list.items || []).map((it) =>
-        typeof it === "string" ? it : it.text
-      );
+      const normalizedItems = (list.items || []).map((it) => {
+        if (typeof it === "string") {
+          return { text: it, done: false };
+        }
+        if (it && typeof it === "object") {
+          return {
+            text: it.text ?? "",
+            done: typeof it.done === "boolean" ? it.done : false,
+          };
+        }
+        return { text: String(it), done: false };
+      });
 
       setItems(normalizedItems);
     }
@@ -51,12 +60,20 @@ export default function ListDetailPage() {
   const addItem = () => {
     const trimmed = newItem.trim();
     if (!trimmed) return;
-    setItems((prev) => [...prev, trimmed]);
+    setItems((prev) => [...prev, { text: trimmed, done: false }]);
     setNewItem("");
   };
 
   const removeItem = (index) => {
     setItems((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const toggleItemDone = (index) => {
+    setItems((prev) =>
+      prev.map((item, i) =>
+        i === index ? { ...item, done: !item.done } : item
+      )
+    );
   };
 
   const handleSave = async () => {
@@ -67,6 +84,7 @@ export default function ListDetailPage() {
     }
 
     try {
+      // uložíme celé objekty { text, done }
       await api.updateShoppingList(id, { name: trimmedName, items });
       nav("/list");
     } catch (e) {
@@ -194,17 +212,41 @@ export default function ListDetailPage() {
             <label style={s.label}>{t("detail.field.items")}</label>
 
             <ul style={s.itemsList}>
-              {items.map((it, i) => (
+              {items.map((item, i) => (
                 <li key={i} style={s.itemRow}>
-                  <span>{it}</span>
-                  {isOwner && (
+                  <span
+                    style={
+                      item.done
+                        ? { ...s.itemText, textDecoration: "line-through", opacity: 0.7 }
+                        : s.itemText
+                    }
+                  >
+                    {item.text}
+                  </span>
+
+                  <div style={s.itemActions}>
                     <button
-                      style={s.deleteSmallButton}
-                      onClick={() => removeItem(i)}
+                      type="button"
+                      style={{
+                        ...s.statusToggle,
+                        ...(item.done ? s.statusDone : s.statusTodo),
+                      }}
+                      onClick={() => toggleItemDone(i)}
                     >
-                      {t("detail.button.deleteItem")}
+                      {item.done
+                        ? t("detail.item.status.done")
+                        : t("detail.item.status.todo")}
                     </button>
-                  )}
+
+                    {isOwner && (
+                      <button
+                        style={s.deleteSmallButton}
+                        onClick={() => removeItem(i)}
+                      >
+                        {t("detail.button.deleteItem")}
+                      </button>
+                    )}
+                  </div>
                 </li>
               ))}
               {items.length === 0 && (
@@ -339,6 +381,15 @@ const s = {
     alignItems: "center",
     padding: "8px 10px",
     borderBottom: "1px solid var(--border-color)",
+    gap: 12,
+  },
+  itemText: {
+    flex: 1,
+  },
+  itemActions: {
+    display: "flex",
+    gap: 8,
+    alignItems: "stretch",
   },
   emptyText: {
     padding: "8px 10px",
@@ -397,6 +448,30 @@ const s = {
     border: "1px solid #ee1111ff",
     cursor: "pointer",
     fontWeight: 600,
+  },
+
+  statusToggle: {
+    padding: "6px 12px",
+    borderRadius: 8,
+    border: "1px solid var(--status-todo-border)",
+    cursor: "pointer",
+    fontSize: 14,
+    background: "var(--status-todo-bg)",
+    color: "var(--status-todo-text)",
+    transition: "0.15s",
+  },
+
+  statusTodo: {
+    // TODO stav – jen lehké zvýraznění, zbytek přebírá ze statusToggle
+    fontWeight: 400,
+  },
+
+  statusDone: {
+    // DONE stav – přepneme na zelené varianty z CSS proměnných
+    background: "var(--status-done-bg)",
+    color: "var(--status-done-text)",
+    border: "1px solid var(--status-done-border)",
+    fontWeight: 400,
   },
 
   // styly pro modální okno

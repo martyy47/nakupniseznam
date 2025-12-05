@@ -78,6 +78,9 @@ const translations = {
     "detail.buttons.cancel": "Zrušit",
     "detail.buttons.save": "Uložit změny",
 
+    "detail.item.status.todo": "Nevyřešená",
+    "detail.item.status.done": "Vyřešená",
+
     "detail.modal.title": "Upozornění",
     "detail.modal.ok": "OK",
     "detail.validation.nameRequired": "Zadejte název seznamu.",
@@ -189,6 +192,9 @@ const translations = {
 
     "detail.buttons.cancel": "Cancel",
     "detail.buttons.save": "Save changes",
+
+    "detail.item.status.todo": "Not done",
+    "detail.item.status.done": "Done",
 
     "detail.modal.title": "Notice",
     "detail.modal.ok": "OK",
