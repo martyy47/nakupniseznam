@@ -5,12 +5,14 @@ import api from "../api";
 import { useApiRequest } from "../hooks/useApiRequest";
 import LoadingIndicator from "../components/LoadingIndicator";
 import ErrorMessage from "../components/ErrorMessage";
+import { useLanguage } from "../components/language/LanguageContext";
 
 const CURRENT_USER_ID = "user-1";
 
 export default function ListDetailPage() {
   const nav = useNavigate();
   const { id } = useParams();
+  const { t } = useLanguage();
 
   const {
     status,
@@ -60,8 +62,7 @@ export default function ListDetailPage() {
   const handleSave = async () => {
     const trimmedName = name.trim();
     if (!trimmedName) {
-      // zabráníme uložení prázdného názvu
-      setDialogMessage("Zadejte název seznamu.");
+      setDialogMessage(t("detail.validation.nameRequired"));
       return;
     }
 
@@ -70,8 +71,7 @@ export default function ListDetailPage() {
       nav("/list");
     } catch (e) {
       console.error(e);
-      // místo alertu použijeme stejné modální okno
-      setDialogMessage("Nepodařilo se uložit změny seznamu.");
+      setDialogMessage(t("detail.error.save"));
     }
   };
 
@@ -86,20 +86,18 @@ export default function ListDetailPage() {
         <div style={s.container}>
           <header style={s.header}>
             <div>
-              <h1 style={s.title}>Detail nákupního seznamu</h1>
-              <p style={s.subtitle}>
-                Zobrazení a úprava existujícího nákupního seznamu.
-              </p>
+              <h1 style={s.title}>{t("detail.title")}</h1>
+              <p style={s.subtitle}>{t("detail.subtitle")}</p>
             </div>
             <div>
               <Link to="/list" style={s.linkBack}>
-                ← Zpět na přehled
+                ← {t("detail.backToList")}
               </Link>
             </div>
           </header>
 
           <div style={s.card}>
-            <LoadingIndicator text="Načítám seznam..." />
+            <LoadingIndicator text={t("detail.loading")} />
           </div>
         </div>
       </div>
@@ -113,26 +111,24 @@ export default function ListDetailPage() {
         <div style={s.container}>
           <header style={s.header}>
             <div>
-              <h1 style={s.title}>Detail nákupního seznamu</h1>
-              <p style={s.subtitle}>
-                Zobrazení a úprava existujícího nákupního seznamu.
-              </p>
+              <h1 style={s.title}>{t("detail.title")}</h1>
+              <p style={s.subtitle}>{t("detail.subtitle")}</p>
             </div>
             <div>
               <Link to="/list" style={s.linkBack}>
-                ← Zpět na přehled
+                ← {t("detail.backToList")}
               </Link>
             </div>
           </header>
 
           <div style={s.card}>
             <ErrorMessage
-              message="Nepodařilo se načíst seznam."
+              message={t("detail.error.load")}
               detail={error?.message}
               onRetry={loadList}
             />
             <Link to="/list" style={s.linkBack}>
-              ← Zpět na přehled
+              ← {t("detail.backToList")}
             </Link>
           </div>
         </div>
@@ -146,14 +142,12 @@ export default function ListDetailPage() {
       <div style={s.container}>
         <header style={s.header}>
           <div>
-            <h1 style={s.title}>Detail nákupního seznamu</h1>
-            <p style={s.subtitle}>
-              Zobrazení a úprava existujícího nákupního seznamu.
-            </p>
+            <h1 style={s.title}>{t("detail.title")}</h1>
+            <p style={s.subtitle}>{t("detail.subtitle")}</p>
           </div>
           <div>
             <Link to="/list" style={s.linkBack}>
-              ← Zpět na přehled
+              ← {t("detail.backToList")}
             </Link>
           </div>
         </header>
@@ -161,7 +155,7 @@ export default function ListDetailPage() {
         <div style={s.card}>
           {/* Název seznamu */}
           <div style={s.field}>
-            <label style={s.label}>Název seznamu</label>
+            <label style={s.label}>{t("detail.field.name")}</label>
             <input
               style={s.input}
               value={name}
@@ -171,33 +165,33 @@ export default function ListDetailPage() {
 
           {/* Vlastník */}
           <div style={s.field}>
-            <label style={s.label}>Vlastník</label>
+            <label style={s.label}>{t("detail.field.owner")}</label>
             <input
               style={{
                 ...s.input,
                 color: "var(--text-muted)",
               }}
-              value={isOwner ? "Vy" : list.ownerName}
+              value={isOwner ? t("detail.owner.you") : list.ownerName}
               readOnly
             />
           </div>
 
           {/* Členové – zatím dummy */}
           <div style={s.field}>
-            <label style={s.label}>Členové</label>
+            <label style={s.label}>{t("detail.field.members")}</label>
             <input
               style={{
                 ...s.input,
                 color: "var(--text-muted)",
               }}
-              value="Zatím žádní členové"
+              value={t("detail.field.members.placeholder")}
               readOnly
             />
           </div>
 
           {/* Položky */}
           <div style={s.field}>
-            <label style={s.label}>Položky</label>
+            <label style={s.label}>{t("detail.field.items")}</label>
 
             <ul style={s.itemsList}>
               {items.map((it, i) => (
@@ -208,13 +202,13 @@ export default function ListDetailPage() {
                       style={s.deleteSmallButton}
                       onClick={() => removeItem(i)}
                     >
-                      Smazat
+                      {t("detail.button.deleteItem")}
                     </button>
                   )}
                 </li>
               ))}
               {items.length === 0 && (
-                <li style={s.emptyText}>Žádné položky.</li>
+                <li style={s.emptyText}>{t("detail.items.empty")}</li>
               )}
             </ul>
 
@@ -222,13 +216,13 @@ export default function ListDetailPage() {
               <div style={s.addRow}>
                 <input
                   style={s.input}
-                  placeholder="Nová položka"
+                  placeholder={t("detail.items.newPlaceholder")}
                   value={newItem}
                   onChange={(e) => setNewItem(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && addItem()}
                 />
                 <button style={s.secondaryButton} onClick={addItem}>
-                  Přidat položku
+                  {t("detail.items.addButton")}
                 </button>
               </div>
             )}
@@ -237,11 +231,11 @@ export default function ListDetailPage() {
           {/* Spodní tlačítka */}
           <div style={s.footerButtons}>
             <button style={s.cancelButton} onClick={handleCancel}>
-              Zrušit
+              {t("detail.buttons.cancel")}
             </button>
             {isOwner && (
               <button style={s.primaryButton} onClick={handleSave}>
-                Uložit změny
+                {t("detail.buttons.save")}
               </button>
             )}
           </div>
@@ -252,14 +246,14 @@ export default function ListDetailPage() {
       {dialogMessage && (
         <div style={s.modalOverlay}>
           <div style={s.modal}>
-            <h2 style={s.modalTitle}>Upozornění</h2>
+            <h2 style={s.modalTitle}>{t("detail.modal.title")}</h2>
             <p style={s.modalText}>{dialogMessage}</p>
             <div style={s.modalButtons}>
               <button
                 style={s.primaryButton}
                 onClick={() => setDialogMessage(null)}
               >
-                OK
+                {t("detail.modal.ok")}
               </button>
             </div>
           </div>

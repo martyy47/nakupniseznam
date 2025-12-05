@@ -8,6 +8,7 @@ import ErrorMessage from "../components/ErrorMessage";
 import SettingsModal from "../components/SettingsModal";
 import IconSettings from "../components/icons/IconSettings";
 import { useTheme } from "../components/theme/ThemeContext";
+import { useLanguage } from "../components/language/LanguageContext";
 
 const CURRENT_USER_ID = "user-1";
 const CURRENT_USER = {
@@ -19,6 +20,7 @@ const CURRENT_USER = {
 export default function ListPage() {
   const nav = useNavigate();
   const { theme, setTheme } = useTheme();
+  const { t } = useLanguage();
 
   const {
     status,
@@ -33,7 +35,6 @@ export default function ListPage() {
   }, [loadLists]);
 
   const [isSettingsOpen, setIsSettingsOpen] = React.useState(false);
-  const [language, setLanguage] = React.useState("cs"); // jazyk zatím lokálně, context doděláme pak
 
   // ✅ /list = vždy jen nearchivované seznamy
   const visibleLists = useMemo(() => {
@@ -63,7 +64,7 @@ export default function ListPage() {
       setLists((prev) => (prev || []).filter((l) => l.id !== toDelete.id));
     } catch (e) {
       console.error(e);
-      alert("Nepodařilo se smazat seznam.");
+      alert(t("list.error.delete"));
     } finally {
       setToDelete(null);
     }
@@ -75,7 +76,7 @@ export default function ListPage() {
     <button
       style={s.settingsButton}
       onClick={() => setIsSettingsOpen(true)}
-      title="Uživatelské nastavení"
+      title={t("settings.title")}
     >
       <IconSettings size={20} />
     </button>
@@ -86,27 +87,25 @@ export default function ListPage() {
     return (
       <div style={s.page}>
         <header style={s.header}>
-          <h1>Nákupní seznamy</h1>
+          <h1>{t("list.title")}</h1>
           <div style={s.headerRight}>
             <button style={s.secondaryButton} onClick={openArchivePage}>
-              Zobrazit archivované
+              {t("list.button.showArchived")}
             </button>
             <button style={s.primaryButton} onClick={openNewPage}>
-              Nový seznam
+              {t("list.button.new")}
             </button>
             {settingsButton}
           </div>
         </header>
 
-        <LoadingIndicator text="Načítám nákupní seznamy..." />
+        <LoadingIndicator text={t("list.loading")} />
 
         <SettingsModal
           open={isSettingsOpen}
           onClose={() => setIsSettingsOpen(false)}
           theme={theme}
           onThemeChange={setTheme}
-          language={language}
-          onLanguageChange={setLanguage}
           user={CURRENT_USER}
         />
       </div>
@@ -118,20 +117,20 @@ export default function ListPage() {
     return (
       <div style={s.page}>
         <header style={s.header}>
-          <h1>Nákupní seznamy</h1>
+          <h1>{t("list.title")}</h1>
           <div style={s.headerRight}>
             <button style={s.secondaryButton} onClick={openArchivePage}>
-              Zobrazit archivované
+              {t("list.button.showArchived")}
             </button>
             <button style={s.primaryButton} onClick={openNewPage}>
-              Nový seznam
+              {t("list.button.new")}
             </button>
             {settingsButton}
           </div>
         </header>
 
         <ErrorMessage
-          message="Nepodařilo se načíst nákupní seznamy."
+          message={t("list.error.load")}
           detail={error?.message}
           onRetry={loadLists}
         />
@@ -141,8 +140,6 @@ export default function ListPage() {
           onClose={() => setIsSettingsOpen(false)}
           theme={theme}
           onThemeChange={setTheme}
-          language={language}
-          onLanguageChange={setLanguage}
           user={CURRENT_USER}
         />
       </div>
@@ -153,15 +150,15 @@ export default function ListPage() {
   return (
     <div style={s.page}>
       <header style={s.header}>
-        <h1>Nákupní seznamy</h1>
+        <h1>{t("list.title")}</h1>
 
         <div style={s.headerRight}>
           <button style={s.secondaryButton} onClick={openArchivePage}>
-            Zobrazit archivované
+            {t("list.button.showArchived")}
           </button>
 
           <button style={s.primaryButton} onClick={openNewPage}>
-            Nový seznam
+            {t("list.button.new")}
           </button>
 
           {settingsButton}
@@ -170,7 +167,7 @@ export default function ListPage() {
 
       <div style={s.grid}>
         {visibleLists.length === 0 && (
-          <div style={s.emptyText}>Žádné seznamy k zobrazení.</div>
+          <div style={s.emptyText}>{t("list.empty")}</div>
         )}
 
         {visibleLists.map((list) => {
@@ -180,7 +177,7 @@ export default function ListPage() {
               <div style={s.cardTitle}>{list.name}</div>
 
               <div style={s.ownerNote}>
-                Vlastník: {isOwner ? "Vy" : list.ownerName}
+                {t("list.owner")}: {isOwner ? t("list.owner.you") : list.ownerName}
               </div>
 
               <div style={s.cardButtons}>
@@ -188,7 +185,7 @@ export default function ListPage() {
                   style={s.detailButton}
                   onClick={() => openDetail(list.id)}
                 >
-                  Zobrazit detail
+                  {t("list.button.detail")}
                 </button>
 
                 {isOwner && (
@@ -196,7 +193,7 @@ export default function ListPage() {
                     style={s.deleteButton}
                     onClick={() => askDelete(list)}
                   >
-                    Smazat
+                    {t("list.button.delete")}
                   </button>
                 )}
               </div>
@@ -209,17 +206,18 @@ export default function ListPage() {
       {toDelete && (
         <div style={s.modalOverlay}>
           <div style={s.modal}>
-            <h3>Smazat nákupní seznam</h3>
+            <h3>{t("list.delete.title")}</h3>
             <p>
-              Opravdu chceš smazat <strong>{toDelete.name}</strong>?
+              {t("list.delete.questionPrefix")}{" "}
+              <strong>{toDelete.name}</strong>?
             </p>
 
             <div style={s.modalButtons}>
               <button style={s.cancelButton} onClick={cancelDelete}>
-                Zrušit
+                {t("list.delete.cancel")}
               </button>
               <button style={s.deleteButton} onClick={confirmDelete}>
-                Smazat
+                {t("list.delete.confirm")}
               </button>
             </div>
           </div>
@@ -232,8 +230,6 @@ export default function ListPage() {
         onClose={() => setIsSettingsOpen(false)}
         theme={theme}
         onThemeChange={setTheme}
-        language={language}
-        onLanguageChange={setLanguage}
         user={CURRENT_USER}
       />
     </div>
@@ -297,13 +293,13 @@ const s = {
     fontWeight: 500,
   },
   deleteButton: {
-  background: "var(--delete-bg)",
-  border: "1px solid #ee1111ff",
-  color: "#ee1111ff",
-  padding: "7px 16px",
-  borderRadius: 8,
-  cursor: "pointer",
-  fontWeight: 600,
+    background: "var(--delete-bg)",
+    border: "1px solid #ee1111ff",
+    color: "#ee1111ff",
+    padding: "7px 16px",
+    borderRadius: 8,
+    cursor: "pointer",
+    fontWeight: 600,
   },
   primaryButton: {
     background: "#2563eb",

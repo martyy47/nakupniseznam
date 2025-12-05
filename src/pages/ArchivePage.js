@@ -5,11 +5,13 @@ import api from "../api";
 import { useApiRequest } from "../hooks/useApiRequest";
 import LoadingIndicator from "../components/LoadingIndicator";
 import ErrorMessage from "../components/ErrorMessage";
+import { useLanguage } from "../components/language/LanguageContext";
 
 const CURRENT_USER_ID = "user-1";
 
 export default function ArchivePage() {
   const nav = useNavigate();
+  const { t } = useLanguage();
 
   const {
     status,
@@ -45,7 +47,7 @@ export default function ArchivePage() {
       setLists((prev) => (prev || []).filter((l) => l.id !== toDeleteOne.id));
     } catch (e) {
       console.error(e);
-      alert("Nepodařilo se smazat archivovaný seznam.");
+      alert(t("archive.error.deleteOne"));
     } finally {
       setToDeleteOne(null);
     }
@@ -63,7 +65,7 @@ export default function ArchivePage() {
       setLists((prev) => (prev || []).filter((l) => !l.archived));
     } catch (e) {
       console.error(e);
-      alert("Nepodařilo se smazat všechny archivované seznamy.");
+      alert(t("archive.error.deleteAll"));
     } finally {
       setToDeleteAll(false);
     }
@@ -76,15 +78,15 @@ export default function ArchivePage() {
     return (
       <div style={s.page}>
         <header style={s.header}>
-          <h1>Archivované seznamy</h1>
+          <h1>{t("archive.title")}</h1>
           <div style={s.headerRight}>
             <Link to="/list" style={s.backLink}>
-              ← Zpět na přehled
+              ← {t("archive.backToList")}
             </Link>
           </div>
         </header>
 
-        <LoadingIndicator text="Načítám archivované seznamy..." />
+        <LoadingIndicator text={t("archive.loading")} />
       </div>
     );
   }
@@ -94,16 +96,16 @@ export default function ArchivePage() {
     return (
       <div style={s.page}>
         <header style={s.header}>
-          <h1>Archivované seznamy</h1>
+          <h1>{t("archive.title")}</h1>
           <div style={s.headerRight}>
             <Link to="/list" style={s.backLink}>
-              ← Zpět na přehled
+              ← {t("archive.backToList")}
             </Link>
           </div>
         </header>
 
         <ErrorMessage
-          message="Nepodařilo se načíst archivované seznamy."
+          message={t("archive.error.load")}
           detail={error?.message}
           onRetry={loadLists}
         />
@@ -115,24 +117,24 @@ export default function ArchivePage() {
   return (
     <div style={s.page}>
       <header style={s.header}>
-        <h1>Archivované seznamy</h1>
+        <h1>{t("archive.title")}</h1>
 
         <div style={s.headerRight}>
           {archivedLists.length > 0 && (
             <button style={s.deleteAllButton} onClick={askDeleteAll}>
-              Smazat všechny archivované
+              {t("archive.button.deleteAll")}
             </button>
           )}
 
           <Link to="/list" style={s.backLink}>
-            ← Zpět na přehled
+            ← {t("archive.backToList")}
           </Link>
         </div>
       </header>
 
       <div style={s.grid}>
         {archivedLists.length === 0 && (
-          <div style={s.emptyText}>Archiv je prázdný.</div>
+          <div style={s.emptyText}>{t("archive.empty")}</div>
         )}
 
         {archivedLists.map((list) => {
@@ -141,7 +143,8 @@ export default function ArchivePage() {
             <div key={list.id} style={s.card}>
               <div style={s.cardTitle}>{list.name}</div>
               <div style={s.ownerNote}>
-                Vlastník: {isOwner ? "Vy" : list.ownerName}
+                {t("archive.owner")}:{" "}
+                {isOwner ? t("archive.owner.you") : list.ownerName}
               </div>
 
               <div style={s.cardButtons}>
@@ -149,7 +152,7 @@ export default function ArchivePage() {
                   style={s.detailButton}
                   onClick={() => openDetail(list.id)}
                 >
-                  Zobrazit detail
+                  {t("archive.button.detail")}
                 </button>
 
                 {isOwner && (
@@ -157,7 +160,7 @@ export default function ArchivePage() {
                     style={s.deleteButton}
                     onClick={() => askDeleteOne(list)}
                   >
-                    Smazat
+                    {t("archive.button.delete")}
                   </button>
                 )}
               </div>
@@ -170,17 +173,18 @@ export default function ArchivePage() {
       {toDeleteOne && (
         <div style={s.modalOverlay}>
           <div style={s.modal}>
-            <h3>Smazat archivovaný seznam</h3>
+            <h3>{t("archive.modal.deleteOne.title")}</h3>
             <p>
-              Opravdu chceš smazat <strong>{toDeleteOne.name}</strong>?
+              {t("archive.modal.deleteOne.questionPrefix")}{" "}
+              <strong>{toDeleteOne.name}</strong>?
             </p>
 
             <div style={s.modalButtons}>
               <button style={s.cancelButton} onClick={cancelDeleteOne}>
-                Zrušit
+                {t("archive.modal.cancel")}
               </button>
               <button style={s.deleteButton} onClick={confirmDeleteOne}>
-                Smazat
+                {t("archive.modal.delete")}
               </button>
             </div>
           </div>
@@ -191,15 +195,15 @@ export default function ArchivePage() {
       {toDeleteAll && (
         <div style={s.modalOverlay}>
           <div style={s.modal}>
-            <h3>Smazat všechny archivované seznamy</h3>
-            <p>Opravdu chceš nenávratně smazat všechny archivované seznamy?</p>
+            <h3>{t("archive.modal.deleteAll.title")}</h3>
+            <p>{t("archive.modal.deleteAll.text")}</p>
 
             <div style={s.modalButtons}>
               <button style={s.cancelButton} onClick={cancelDeleteAll}>
-                Zrušit
+                {t("archive.modal.cancel")}
               </button>
               <button style={s.deleteButton} onClick={confirmDeleteAll}>
-                Smazat vše
+                {t("archive.modal.deleteAllConfirm")}
               </button>
             </div>
           </div>

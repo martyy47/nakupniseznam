@@ -2,12 +2,14 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../api";
+import { useLanguage } from "../components/language/LanguageContext";
 
 const CURRENT_USER_ID = "user-1";
 const CURRENT_USER_NAME = "Matyáš Novák";
 
 export default function NewListPage() {
   const nav = useNavigate();
+  const { t } = useLanguage();
 
   const [name, setName] = useState("");
   const [items, setItems] = useState([]); // nový seznam je prázdný
@@ -30,7 +32,7 @@ export default function NewListPage() {
 
   const handleSave = async () => {
     if (!name.trim()) {
-      setDialogMessage("Zadejte název seznamu.");
+      setDialogMessage(t("newList.validation.nameRequired"));
       return;
     }
     setSaving(true);
@@ -44,7 +46,7 @@ export default function NewListPage() {
       nav("/list");
     } catch (e) {
       console.error(e);
-      setDialogMessage("Nepodařilo se uložit nový seznam.");
+      setDialogMessage(t("newList.error.save"));
     } finally {
       setSaving(false);
     }
@@ -59,12 +61,12 @@ export default function NewListPage() {
       <div style={s.container}>
         <header style={s.header}>
           <div>
-            <h1 style={s.title}>Nový nákupní seznam</h1>
-            <p style={s.subtitle}>Vytvoř si nový seznam a přidej položky.</p>
+            <h1 style={s.title}>{t("newList.title")}</h1>
+            <p style={s.subtitle}>{t("newList.subtitle")}</p>
           </div>
           <div>
             <Link to="/list" style={s.linkBack}>
-              ← Zpět na přehled
+              ← {t("newList.backToList")}
             </Link>
           </div>
         </header>
@@ -72,37 +74,37 @@ export default function NewListPage() {
         <div style={s.card}>
           {/* Název seznamu */}
           <div style={s.field}>
-            <label style={s.label}>Název seznamu</label>
+            <label style={s.label}>{t("newList.field.name")}</label>
             <input
               style={s.input}
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Zadejte název seznamu"
+              placeholder={t("newList.field.name.placeholder")}
             />
           </div>
 
           {/* Vlastník */}
           <div style={s.field}>
-            <label style={s.label}>Vlastník</label>
+            <label style={s.label}>{t("newList.field.owner")}</label>
             <div style={s.readonlyBox}>{CURRENT_USER_NAME}</div>
           </div>
 
           {/* Členové */}
           <div style={s.field}>
-            <label style={s.label}>Členové</label>
+            <label style={s.label}>{t("newList.field.members")}</label>
             <input
               style={{
                 ...s.input,
                 color: "var(--text-muted)",
               }}
-              value="Zatím žádní členové"
+              value={t("newList.field.members.placeholder")}
               readOnly
             />
           </div>
 
           {/* Položky */}
           <div style={s.field}>
-            <label style={s.label}>Položky</label>
+            <label style={s.label}>{t("newList.field.items")}</label>
 
             <ul style={s.itemsList}>
               {items.map((it, i) => (
@@ -112,25 +114,25 @@ export default function NewListPage() {
                     style={s.deleteSmallButton}
                     onClick={() => removeItem(i)}
                   >
-                    Smazat
+                    {t("newList.button.deleteItem")}
                   </button>
                 </li>
               ))}
               {items.length === 0 && (
-                <li style={s.emptyText}>Zatím nemáš žádné položky.</li>
+                <li style={s.emptyText}>{t("newList.items.empty")}</li>
               )}
             </ul>
 
             <div style={s.addRow}>
               <input
                 style={s.input}
-                placeholder="Nová položka"
+                placeholder={t("newList.items.newPlaceholder")}
                 value={newItem}
                 onChange={(e) => setNewItem(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && addItem()}
               />
               <button style={s.secondaryButton} onClick={addItem}>
-                Přidat položku
+                {t("newList.items.addButton")}
               </button>
             </div>
           </div>
@@ -138,14 +140,16 @@ export default function NewListPage() {
           {/* Spodní tlačítka */}
           <div style={s.footerButtons}>
             <button style={s.cancelButton} onClick={handleCancel}>
-              Zrušit
+              {t("newList.buttons.cancel")}
             </button>
             <button
               style={s.primaryButton}
               onClick={handleSave}
               disabled={saving}
             >
-              {saving ? "Ukládám..." : "Uložit seznam"}
+              {saving
+                ? t("newList.buttons.saving")
+                : t("newList.buttons.save")}
             </button>
           </div>
         </div>
@@ -155,14 +159,14 @@ export default function NewListPage() {
       {dialogMessage && (
         <div style={s.modalOverlay}>
           <div style={s.modal}>
-            <h2 style={s.modalTitle}>Upozornění</h2>
+            <h2 style={s.modalTitle}>{t("newList.modal.title")}</h2>
             <p style={s.modalText}>{dialogMessage}</p>
             <div style={s.modalButtons}>
               <button
                 style={s.primaryButton}
                 onClick={() => setDialogMessage(null)}
               >
-                OK
+                {t("newList.modal.ok")}
               </button>
             </div>
           </div>

@@ -1,44 +1,45 @@
 // src/components/SettingsModal.js
 import React from "react";
+import { useLanguage } from "./language/LanguageContext";
 
 export default function SettingsModal({
   open,
   onClose,
   theme,
   onThemeChange,
-  language,
-  onLanguageChange,
   user,
 }) {
+  const { language, setLanguage, t } = useLanguage();
+
   if (!open) return null;
 
   const setLight = () => onThemeChange("light");
   const setDark = () => onThemeChange("dark");
 
   return (
-    <div
-      style={styles.overlay}
-      onClick={onClose}
-    >
-      <div
-        style={styles.modal}
-        onClick={(e) => e.stopPropagation()}
-      >
+    <div style={styles.overlay} onClick={onClose}>
+      <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div style={styles.header}>
-          <h2 style={{ margin: 0 }}>Uživatelské nastavení</h2>
+          <h2 style={{ margin: 0 }}>{t("settings.title")}</h2>
         </div>
 
         {/* User info */}
         <div style={styles.userInfo}>
-          <div><strong>Jméno:</strong> {user?.name}</div>
-          <div><strong>Email:</strong> {user?.email}</div>
-          <div><strong>ID:</strong> {user?.id}</div>
+          <div>
+            <strong>{t("settings.user.name")}:</strong> {user?.name}
+          </div>
+          <div>
+            <strong>{t("settings.user.email")}:</strong> {user?.email}
+          </div>
+          <div>
+            <strong>{t("settings.user.id")}:</strong> {user?.id}
+          </div>
         </div>
 
         {/* Theme */}
         <section style={styles.section}>
-          <h3 style={styles.sectionTitle}>Vzhled</h3>
+          <h3 style={styles.sectionTitle}>{t("settings.appearance")}</h3>
 
           <div style={styles.themeToggle}>
             <button
@@ -52,7 +53,7 @@ export default function SettingsModal({
                 borderBottomLeftRadius: 999,
               }}
             >
-              Světlý režim
+              {t("settings.theme.light")}
             </button>
 
             <button
@@ -65,31 +66,29 @@ export default function SettingsModal({
                 borderBottomRightRadius: 999,
               }}
             >
-              Tmavý režim
+              {t("settings.theme.dark")}
             </button>
           </div>
         </section>
 
         {/* Language */}
         <section style={styles.section}>
-          <h3 style={styles.sectionTitle}>Jazyk</h3>
+          <h3 style={styles.sectionTitle}>{t("settings.language")}</h3>
+
           <select
             value={language}
-            onChange={(e) => onLanguageChange(e.target.value)}
+            onChange={(e) => setLanguage(e.target.value)}
             style={styles.select}
           >
-            <option value="cs">Čeština</option>
-            <option value="en">English</option>
+            <option value="cs">{t("language.cs")}</option>
+            <option value="en">{t("language.en")}</option>
           </select>
         </section>
 
         {/* Footer */}
         <div style={styles.footer}>
-          <button
-            onClick={onClose}
-            style={styles.closeButton}
-          >
-            Zavřít
+          <button onClick={onClose} style={styles.closeButton}>
+            {t("settings.close")}
           </button>
         </div>
       </div>
