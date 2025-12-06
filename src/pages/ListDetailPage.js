@@ -57,6 +57,12 @@ export default function ListDetailPage() {
 
   const isOwner = list && list.ownerId === CURRENT_USER_ID;
 
+  // Souhrn pro progress bar
+  const totalCount = items.length;
+  const doneCount = items.filter((i) => i.done).length;
+  const percentDone =
+    totalCount === 0 ? 0 : Math.round((doneCount / totalCount) * 100);
+
   const addItem = () => {
     const trimmed = newItem.trim();
     if (!trimmed) return;
@@ -217,7 +223,11 @@ export default function ListDetailPage() {
                   <span
                     style={
                       item.done
-                        ? { ...s.itemText, textDecoration: "line-through", opacity: 0.7 }
+                        ? {
+                            ...s.itemText,
+                            textDecoration: "line-through",
+                            opacity: 0.7,
+                          }
                         : s.itemText
                     }
                   >
@@ -249,6 +259,7 @@ export default function ListDetailPage() {
                   </div>
                 </li>
               ))}
+
               {items.length === 0 && (
                 <li style={s.emptyText}>{t("detail.items.empty")}</li>
               )}
@@ -270,16 +281,34 @@ export default function ListDetailPage() {
             )}
           </div>
 
-          {/* Spodní tlačítka */}
+          {/* Souhrnná lišta + spodní tlačítka */}
           <div style={s.footerButtons}>
-            <button style={s.cancelButton} onClick={handleCancel}>
-              {t("detail.buttons.cancel")}
-            </button>
-            {isOwner && (
-              <button style={s.primaryButton} onClick={handleSave}>
-                {t("detail.buttons.save")}
+            <div style={s.summaryContainer}>
+              <div style={s.summaryBarBg}>
+                <div
+                  style={{
+                    ...s.summaryBarFill,
+                    width: `${percentDone}%`,
+                  }}
+                />
+              </div>
+              <div style={s.summaryText}>
+                {percentDone}% {t("detail.summary.donePercent")} (
+                {doneCount} {t("detail.summary.doneCount")} /{" "}
+                {totalCount} {t("detail.summary.totalCount")})
+              </div>
+            </div>
+
+            <div style={s.footerButtonsRight}>
+              <button style={s.cancelButton} onClick={handleCancel}>
+                {t("detail.buttons.cancel")}
               </button>
-            )}
+              {isOwner && (
+                <button style={s.primaryButton} onClick={handleSave}>
+                  {t("detail.buttons.save")}
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -405,8 +434,9 @@ const s = {
   footerButtons: {
     marginTop: 24,
     display: "flex",
-    justifyContent: "flex-end",
-    gap: 12,
+    justifyContent: "space-between",
+    alignItems: "center",
+    gap: 16,
   },
 
   primaryButton: {
@@ -472,6 +502,37 @@ const s = {
     color: "var(--status-done-text)",
     border: "1px solid var(--status-done-border)",
     fontWeight: 400,
+  },
+
+  // progress + souhrn
+  summaryContainer: {
+    flex: 1,
+    display: "flex",
+    flexDirection: "column",
+    gap: 4,
+    marginRight: 16,
+  },
+  summaryBarBg: {
+    width: "100%",
+    height: 12,
+    borderRadius: 999,
+    background: "#e5e7eb",
+    overflow: "hidden",
+  },
+  summaryBarFill: {
+    height: "100%",
+    borderRadius: 999,
+    background: "#2563eb",
+    transition: "width 0.25s ease",
+  },
+  summaryText: {
+    fontSize: 13,
+    color: "var(--text-muted)",
+  },
+  footerButtonsRight: {
+    display: "flex",
+    gap: 12,
+    alignItems: "center",
   },
 
   // styly pro modální okno

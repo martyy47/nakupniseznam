@@ -49,7 +49,7 @@ const translations = {
     "archive.modal.deleteOne.questionPrefix": "Opravdu chceš smazat",
     "archive.modal.deleteAll.title": "Smazat všechny archivované seznamy",
     "archive.modal.deleteAll.text":
-    "Opravdu chceš nenávratně smazat všechny archivované seznamy?",
+    "Opravdu chcete nenávratně smazat všechny archivované seznamy?",
     "archive.modal.cancel": "Zrušit",
     "archive.modal.delete": "Smazat",
     "archive.modal.deleteAllConfirm": "Smazat vše",
@@ -86,6 +86,10 @@ const translations = {
     "detail.validation.nameRequired": "Zadejte název seznamu.",
     "detail.error.save": "Nepodařilo se uložit změny seznamu.",
     "detail.owner.you": "Vy",
+
+    "detail.summary.donePercent": "hotovo",
+    "detail.summary.doneCount": "vyřešené",
+    "detail.summary.totalCount": "celkem",
 
     // New list page
     "newList.title": "Nový nákupní seznam",
@@ -201,6 +205,10 @@ const translations = {
     "detail.validation.nameRequired": "Please enter the list name.",
     "detail.error.save": "Failed to save list changes.",
     "detail.owner.you": "You",
+
+    "detail.summary.donePercent": "done",
+    "detail.summary.doneCount": "completed",
+    "detail.summary.totalCount": "total",
 
     // New list page
     "newList.title": "New shopping list",
